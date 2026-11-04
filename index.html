@@ -796,6 +796,31 @@ function slashFX(big) {
   addFX(holder, 0.22, (e, k) => { m.material.opacity = 1 - k; holder.scale.setScalar(0.8 + k * 0.4); m.rotation.z += 0.08; });
 }
 
+// Enemy attack animation: a glowing wind-up flare in the weapon hand, then a swing arc and sparks on impact.
+const ENEMY_ARC_GEO = new THREE.TorusGeometry(1, 0.06, 6, 28, Math.PI * 0.8);
+const FLARE_GEO = new THREE.SphereGeometry(0.22, 10, 8);
+function attackWindupFX(u, t) {
+  const T = TYPES[u.type], color = u.team === 'enemy' ? 0xff3b1f : 0xb46cff;
+  const m = new THREE.Mesh(FLARE_GEO, fxMat(color, 0.9)); m.userData.sharedGeo = true;
+  const s = Math.max(1, T.h / 2.2);
+  addFX(m, t, (e, k) => {
+    const f = fwdOf(u), side = new THREE.Vector3(f.z, 0, -f.x);
+    m.position.copy(u.pos).addScaledVector(f, u.radius * 0.6).addScaledVector(side, -0.35 * s).setY(T.h * (0.75 + k * 0.2));
+    m.scale.setScalar(s * (0.4 + k * 1.1) * (1 + Math.sin(k * 30) * 0.12)); m.material.opacity = 0.5 + k * 0.5;
+  });
+}
+function attackSwingFX(u, tg) {
+  const T = TYPES[u.type], color = u.team === 'enemy' ? 0xff5a1f : 0xb46cff;
+  const r = u.range + u.radius * 0.6 + 0.4;
+  const m = new THREE.Mesh(ENEMY_ARC_GEO, fxMat(color)); m.userData.sharedGeo = true;
+  const holder = new THREE.Group(); holder.add(m); holder.userData.sharedGeo = true;
+  holder.position.copy(u.pos).setY(T.h * 0.5); holder.rotation.y = u.root.rotation.y;
+  m.rotation.x = Math.PI / 2; m.rotation.z = Math.PI * 0.1 - 0.9; m.rotation.y = (Math.random() - 0.5) * 0.6; // sweeps across the front
+  holder.scale.setScalar(r);
+  addFX(holder, 0.25, (e, k) => { m.material.opacity = 1 - k; m.rotation.z += 0.12; holder.scale.setScalar(r * (0.85 + k * 0.3)); });
+  if (tg) burstFX(tg.pos.clone().setY(1.1), color, 6, 4);
+}
+
 // ================================================================ telegraphed danger zones
 // Red zones fill up, then deal damage to anything still standing in them.
 function telegraph(o) {
@@ -914,6 +939,12 @@ function warCry(u) {
 }
 
 // ================================================================ units
+// Each shadow in your army makes enemies 5% tougher and 2.5% stronger, up to 40 shadows.
+function armyPower() {
+  const n = Math.min(40, army.length);
+  return { n, hp: 1 + 0.05 * n, dmg: 1 + 0.025 * n };
+}
+
 function spawnUnit(type, team, pos, extra = {}) {
   const T = TYPES[type], rig = buildRig(type, team === 'shadow');
   rig.root.position.copy(pos); rig.root.position.y = 0;
@@ -921,17 +952,22 @@ function spawnUnit(type, team, pos, extra = {}) {
   scene.add(rig.root);
   let hpMul, dmgMul;
   if (team === 'enemy') {
-    if (T.guardian) { hpMul = 1 + 0.65 * (rift - 1); dmgMul = 1 + 0.25 * (rift - 1); }
-    else if (T.boss) { const cyc = Math.max(1, Math.floor(rift / 5)); hpMul = 1 + 0.6 * (cyc - 1); dmgMul = 1 + 0.25 * (cyc - 1); }
+    // Bosses grow much faster from rift to rift than regular enemies.
+    if (T.guardian) { hpMul = 1 + 0.9 * (rift - 1); dmgMul = 1 + 0.3 * (rift - 1); }
+    else if (T.boss) { const cyc = Math.max(1, Math.floor(rift / 5)); hpMul = 1 + 1.0 * (cyc - 1); dmgMul = 1 + 0.35 * (cyc - 1); }
     else { hpMul = 1 + 0.6 * (rift - 1); dmgMul = 1 + 0.22 * (rift - 1); }
     if (extra.elite) { hpMul *= 2.2; dmgMul *= 1.4; }
+    // The bigger your shadow army, the stronger the rift's enemies become.
+    const ap = armyPower(); hpMul *= ap.hp; dmgMul *= ap.dmg;
   } else {
     hpMul = (1 + 0.035 * player.level) * (T.boss ? 0.3 : 1);
     dmgMul = 1 + 0.035 * player.level;
   }
+  // Later bosses also gain armor and attack faster (up to +0.2 armor and 25% faster).
+  const bossLate = team === 'enemy' && T.boss ? Math.min(1, Math.max(0, rift - 1) / 20) : 0;
   const u = {
     type, team, rig, root: rig.root, pos: rig.root.position, maxHp: T.hp * hpMul, hp: T.hp * hpMul, dmg: T.dmg * dmgMul,
-    speed: T.speed * (team === 'shadow' ? 1.15 : 1), range: T.range, cd: T.cd, radius: T.radius, armor: (T.armor || 0) + (extra.elite ? 0.1 : 0),
+    speed: T.speed * (team === 'shadow' ? 1.15 : 1), range: T.range, cd: T.cd * (1 - 0.25 * bossLate), radius: T.radius, armor: (T.armor || 0) + (extra.elite ? 0.1 : 0) + 0.2 * bossLate,
     lvl: team === 'enemy' ? rift * 2 + RANK_IDX[T.rank] * 2 : player.level,
     atkCd: Math.random(), attackT: 0, walkT: 0, seed: Math.random() * 10, moving: false, curSpeed: 0, alive: true, rising: 0, stun: 0,
     kb: null, pending: null, windup: null, charge: null, lungeCd: 2, atkCount: 0, ...extra,
@@ -1011,7 +1047,7 @@ function killUnit(u, src) {
     marker.rotation.x = -Math.PI / 2; marker.position.set(u.pos.x, 0.06, u.pos.z); marker.scale.setScalar(T.radius * 1.6 + 0.5);
     scene.add(marker); u.marker = marker;
     corpses.push(u);
-    player.mp = Math.min(player.maxMp, player.mp + 4);
+    player.mp = Math.min(player.maxMp, player.mp + 2);
     if (T.boss) {
       bigText('BOSS DEFEATED', `${T.name} has fallen — try to make it rise`);
       shake(0.8);
@@ -1341,7 +1377,7 @@ function updatePlayer(dt) {  player.atkCd -= dt; player.invuln -= dt; player.com
     player.rig.body.rotation.x = Math.max(-Math.PI / 2, player.rig.body.rotation.x - dt * 4);
     return;
   }
-  player.mp = Math.min(player.maxMp, player.mp + dt * (2.5 + player.level * 0.02));
+  player.mp = Math.min(player.maxMp, player.mp + dt * (0.9 + player.level * 0.008));
   player.hp = Math.min(player.maxHp, player.hp + dt * (0.5 + player.level * 0.02) * (riftState === 'fighting' || riftState === 'boss' ? 1 : 10));
   updateRegen(dt);
   if ((mouseHeld && document.pointerLockElement === canvas) || touchAttack) playerAttack();
@@ -1688,6 +1724,11 @@ function updateUnit(u, dt) {
   if (u.charge) { updateCharge(u, dt); clampArena(u.pos); u.rig.update(u, dt); return; }
   if (u.windup) {
     u.windup.t -= dt;
+    // Charging a special attack: red energy gathers around the attacker.
+    if (u.team === 'enemy' && !u.burrowed && Math.random() < dt * 25) {
+      const a = Math.random() * TAU, r = u.radius + 0.6;
+      burstFX(u.pos.clone().add(new THREE.Vector3(Math.cos(a) * r, T.h * (0.3 + Math.random() * 0.6), Math.sin(a) * r)), 0xff3b1f, 1, 1.5);
+    }
     if (u.windup.t <= 0) { const w = u.windup; u.windup = null; w.fn(); }
     u.rig.update(u, dt);
     return;
@@ -1698,7 +1739,11 @@ function updateUnit(u, dt) {
       const tg = u.pending.target; u.pending = null;
       if (isAlive(tg)) {
         if (T.ranged) shoot(u, tg);
-        else if (dist2D(u.pos, tg.pos) <= u.range + tg.radius + u.radius + 0.5) dealDamage(tg, unitDmg(u) * (0.85 + Math.random() * 0.3), u);
+        else {
+          const inReach = dist2D(u.pos, tg.pos) <= u.range + tg.radius + u.radius + 0.5;
+          if (u.team === 'enemy') attackSwingFX(u, inReach ? tg : null);
+          if (inReach) dealDamage(tg, unitDmg(u) * (0.85 + Math.random() * 0.3), u);
+        }
       }
     }
   }
@@ -1737,7 +1782,10 @@ function updateUnit(u, dt) {
         u.windup = { t: 0.75, fn: () => { u.attackT = 1; } };
       } else {
         u.attackT = 1;
-        u.pending = { t: T.ranged ? 0.3 : 0.35, target: tg };
+        // Enemies wind up a little longer, with a glowing flare, so you can see the hit coming.
+        const t = u.team === 'enemy' ? (T.ranged ? 0.4 : 0.42) : (T.ranged ? 0.3 : 0.35);
+        u.pending = { t, target: tg };
+        if (u.team === 'enemy') attackWindupFX(u, t);
       }
     }
   } else if (u.team === 'shadow') {
@@ -2167,6 +2215,8 @@ function updateHUD() {
   $('riftInfo').textContent = riftState === 'boss' ? (bossQueue.length ? `Boss arriving: ${TYPES[bossQueue[0]].name}` : `Defeat the boss · ${enemiesAlive.length} enemies`)
     : riftState === 'fighting' ? `Enemies remaining: ${spawnQueue.length + enemiesAlive.length} · then the boss`
     : riftState === 'cleared' ? `Next rift opens in ${Math.ceil(interT)}s` : `First rift opens in ${Math.ceil(Math.max(0, interT))}s`;
+  const ap = armyPower();
+  if (ap.n) $('riftInfo').textContent += ` · Army threat: enemies +${Math.round((ap.hp - 1) * 100)}% HP, +${Math.round((ap.dmg - 1) * 100)}% dmg`;
   for (const [id, a] of Object.entries(AB)) {
     const c = $('c-' + id);
     c.querySelector('.cd').style.height = Math.max(0, cds[id] / a.cd * 100) + '%';

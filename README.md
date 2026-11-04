@@ -10,6 +10,9 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 - **Recover between fights.** If you take no damage for 7 seconds, you heal quickly (6% of max HP per second). The next hit you take stops the healing.
 - **Arise.** Press **R**, or turn on voice with **V** and say "Arise!", to raise nearby fallen enemies as shadow soldiers. Each body fades after a short time, and raising it can fail.
 - **Build an army.** Your shadows are saved between sessions. When a shadow falls, it has to reform over time and then costs mana to deploy again.
+- **Your army has a price.** Each shadow you own makes rift enemies 5% tougher and 2.5% stronger, up to 40 shadows. The rift panel shows the current bonus.
+- **Mana is scarce.** It refills slowly (about 1 per second), so choose your abilities and deployments carefully.
+- **Read the attacks.** Enemies wind up with a glowing flare in their weapon hand before each hit, and red energy gathers around them before a special attack.
 - **Clear the rifts.** Waves of goblins, dire wolves, orc brutes, warlocks and armored knights come through rift portals. **Every rift ends with a boss.** Bosses have phases, and their big attacks show a red warning zone on the ground before they hit.
   - **Every 5th rift** ends with a major boss: the Rift Colossus, the Bloodfang Alpha or the Ashen Lich.
   - **Every other rift** ends with a Rift Guardian:
@@ -18,6 +21,7 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
     - **Crimson Duelist:** chained dash strikes, a parry stance that blocks and punishes close attacks (use ranged attacks), and mirror images.
     - **Rime Warden:** frost nova and ice lances that slow you, and below half HP a frozen armor shell inside a blizzard.
   - From rift 16, two guardians appear at once.
+  - **Each rift's boss is much stronger than the last:** more HP, more damage, more armor and faster attacks.
   - **All bosses:**
     - Below 20% HP they enter a **Last Stand**: 30% more damage, 25% less damage taken, faster abilities.
     - If the fight lasts too long (100 s for guardians, 150 s for major bosses), they **enrage** permanently.
