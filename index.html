@@ -505,14 +505,14 @@ function buildRig(key, shadow) {
 // ================================================================ unit types
 // rank drives deploy cost and recovery time when a shadow falls
 const TYPES = {
-  goblin:   { name: 'Goblin',          rank: 'E', hp: 70,   dmg: 7,  speed: 3.9, range: 1.1, cd: 1.2, radius: 0.45, h: 1.35 },
-  wolf:     { name: 'Dire Wolf',       rank: 'D', hp: 95,   dmg: 10, speed: 6.2, range: 1.1, cd: 0.9, radius: 0.6,  h: 1.25, lunge: true },
-  orc:      { name: 'Orc Brute',       rank: 'C', hp: 280,  dmg: 19, speed: 3.1, range: 1.5, cd: 1.5, radius: 0.85, h: 2.9, armor: 0.15, slam: true },
-  warlock:  { name: 'Rift Warlock',    rank: 'C', hp: 130,  dmg: 14, speed: 3.0, range: 11,  cd: 2.2, radius: 0.5,  h: 2.0, ranged: true, kite: true },
-  knight:   { name: 'Fallen Knight',   rank: 'B', hp: 360,  dmg: 21, speed: 3.4, range: 1.6, cd: 1.15, radius: 0.7, h: 2.3, armor: 0.25, block: true },
-  colossus: { name: 'Rift Colossus',   rank: 'S', hp: 9000, dmg: 46, speed: 2.4, range: 2.6, cd: 2.1, radius: 1.9,  h: 7.2, armor: 0.45, boss: true, ccImmune: true },
-  alpha:    { name: 'Bloodfang Alpha', rank: 'S', hp: 7000, dmg: 34, speed: 6.8, range: 1.8, cd: 1.0, radius: 1.5,  h: 3.4, armor: 0.3,  boss: true },
-  lich:     { name: 'Ashen Lich',      rank: 'S', hp: 6200, dmg: 28, speed: 3.0, range: 14,  cd: 1.7, radius: 0.9,  h: 3.4, armor: 0.3,  boss: true, ranged: true, kite: true },
+  goblin:   { name: 'Goblin',          rank: 'E', hp: 130,   dmg: 7,  speed: 3.9, range: 1.1, cd: 1.2, radius: 0.45, h: 1.35, armor: 0.05 },
+  wolf:     { name: 'Dire Wolf',       rank: 'D', hp: 170,   dmg: 10, speed: 6.2, range: 1.1, cd: 0.9, radius: 0.6,  h: 1.25, armor: 0.1, lunge: true },
+  orc:      { name: 'Orc Brute',       rank: 'C', hp: 500,   dmg: 19, speed: 3.1, range: 1.5, cd: 1.5, radius: 0.85, h: 2.9, armor: 0.25, slam: true },
+  warlock:  { name: 'Rift Warlock',    rank: 'C', hp: 230,   dmg: 14, speed: 3.0, range: 11,  cd: 2.2, radius: 0.5,  h: 2.0, armor: 0.1, ranged: true, kite: true },
+  knight:   { name: 'Fallen Knight',   rank: 'B', hp: 650,   dmg: 21, speed: 3.4, range: 1.6, cd: 1.15, radius: 0.7, h: 2.3, armor: 0.35, block: true },
+  colossus: { name: 'Rift Colossus',   rank: 'S', hp: 15000, dmg: 46, speed: 2.4, range: 2.6, cd: 2.1, radius: 1.9,  h: 7.2, armor: 0.5, boss: true, ccImmune: true },
+  alpha:    { name: 'Bloodfang Alpha', rank: 'S', hp: 11500, dmg: 34, speed: 6.8, range: 1.8, cd: 1.0, radius: 1.5,  h: 3.4, armor: 0.35, boss: true },
+  lich:     { name: 'Ashen Lich',      rank: 'S', hp: 10000, dmg: 28, speed: 3.0, range: 14,  cd: 1.7, radius: 0.9,  h: 3.4, armor: 0.35, boss: true, ranged: true, kite: true },
 };
 const RANK_IDX = { E: 0, D: 1, C: 2, B: 3, A: 4, S: 5 };
 const DEPLOY_COST = { E: 8, D: 12, C: 20, B: 30, S: 80 };
@@ -598,7 +598,7 @@ const aura = new THREE.PointLight(0x8b5cf6, 6, 9); aura.position.y = 2; player.r
 function recalcStats() {
   const L = player.level;
   player.maxHp = Math.round(160 + L * 7); player.maxMp = Math.round(90 + L * 2.5);
-  player.str = 12 + L * 0.85; player.speed = 7 + Math.min(2.5, L * 0.03);
+  player.str = 12 + L * 0.6; player.speed = 7 + Math.min(2.5, L * 0.03);
   aura.intensity = 6 + Math.min(20, L * 0.2);
 }
 const armyLimit = () => Math.min(40, 3 + Math.floor(player.level / 3));
@@ -765,8 +765,8 @@ function spawnUnit(type, team, pos, extra = {}) {
   scene.add(rig.root);
   let hpMul, dmgMul;
   if (team === 'enemy') {
-    if (T.boss) { const cyc = Math.max(1, Math.floor(rift / 5)); hpMul = 1 + 0.35 * (cyc - 1); dmgMul = 1 + 0.2 * (cyc - 1); }
-    else { hpMul = 1 + 0.45 * (rift - 1); dmgMul = 1 + 0.22 * (rift - 1); }
+    if (T.boss) { const cyc = Math.max(1, Math.floor(rift / 5)); hpMul = 1 + 0.5 * (cyc - 1); dmgMul = 1 + 0.2 * (cyc - 1); }
+    else { hpMul = 1 + 0.6 * (rift - 1); dmgMul = 1 + 0.22 * (rift - 1); }
     if (extra.elite) { hpMul *= 2.2; dmgMul *= 1.4; }
   } else {
     hpMul = (1 + 0.035 * player.level) * (T.boss ? 0.3 : 1);
@@ -816,6 +816,7 @@ function dealDamage(target, amount, src, o = {}) {
     if (fwdOf(target).dot(to) > 0.4) { amount *= 0.3; tag = 'BLOCK '; sfx('block'); }
   }
   target.hp -= amount;
+  target.sinceHit = 0;
   const col = target.team === 'enemy' ? (tag ? '#94a3b8' : o.crit ? '#fde047' : '#ffffff') : '#d8b4fe';
   floatText(target.pos.clone().setY(T.h * 0.8), tag + Math.round(amount) + (o.crit ? '!' : ''), col, o.crit ? 22 : 15);
   if (target.hp <= 0) killUnit(target, src);
@@ -1292,6 +1293,11 @@ function updateUnit(u, dt) {
     return;
   }
   if (u.kb) { u.pos.addScaledVector(u.kb, dt); u.kb.multiplyScalar(Math.max(0, 1 - dt * 8)); if (u.kb.lengthSq() < 0.01) u.kb = null; }
+  // Enemies left alone for 4s regenerate, so you have to keep the pressure on.
+  if (u.team === 'enemy') {
+    u.sinceHit = (u.sinceHit || 0) + dt;
+    if (u.sinceHit > 4 && u.hp < u.maxHp) u.hp = Math.min(u.maxHp, u.hp + u.maxHp * (T.boss ? 0.01 : 0.03) * dt);
+  }
   if (u.stun > 0) {
     u.stun -= dt; u.pending = null; u.moving = false;
     if (Math.random() < dt * 3) floatText(u.pos.clone().setY(T.h + 0.2), '✦', '#fde047', 14);
@@ -1462,7 +1468,7 @@ function updateRift(dt) {
       const portal = T.boss ? portals[0] : activePortals[Math.floor(Math.random() * activePortals.length)];
       const toCenter = portal.pos.clone().negate().setY(0).normalize();
       const pos = portal.pos.clone().addScaledVector(toCenter, 3 + T.radius).add(new THREE.Vector3((Math.random() - 0.5) * 5, 0, (Math.random() - 0.5) * 5));
-      const elite = !T.boss && rift >= 3 && Math.random() < 0.1 + rift * 0.01;
+      const elite = !T.boss && rift >= 2 && Math.random() < 0.15 + rift * 0.015;
       spawnUnit(type, 'enemy', pos, { elite });
       burstFX(pos.clone().setY(1), 0x3b82f6, 8, 4);
       if (T.boss) { bigText(T.name.toUpperCase(), 'S-RANK BOSS'); sfx('roar'); shake(0.6); }
