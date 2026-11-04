@@ -7,6 +7,7 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 ## How it plays
 
 - **Every kill gives you a level.** Your HP, mana, strength and army size grow as you fight.
+- **Recover between fights.** If you take no damage for 7 seconds, you heal quickly (6% of max HP per second). The next hit you take stops the healing.
 - **Arise.** Press **R**, or turn on voice with **V** and say "Arise!", to raise nearby fallen enemies as shadow soldiers. Each body fades after a short time, and raising it can fail.
 - **Build an army.** Your shadows are saved between sessions. When a shadow falls, it has to reform over time and then costs mana to deploy again.
 - **Clear the rifts.** Waves of goblins, dire wolves, orc brutes, warlocks and armored knights come through rift portals. **Every rift ends with a boss.** Bosses have phases, and their big attacks show a red warning zone on the ground before they hit.

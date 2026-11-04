@@ -688,7 +688,7 @@ const joy = { active: false, x: 0, y: 0 };
 
 const player = {
   isPlayer: true, rig: null, root: new THREE.Group(), team: 'shadow', radius: 0.5,
-  level: 1, hp: 160, maxHp: 160, mp: 90, maxMp: 90, str: 12, speed: 7, alive: true, stun: 0, slowT: 0,
+  level: 1, hp: 160, maxHp: 160, mp: 90, maxMp: 90, str: 12, speed: 7, alive: true, stun: 0, slowT: 0, sinceHit: 0, regenOn: false,
   invuln: 0, atkCd: 0, attackT: 0, atkArm: 'R', combo: 0, comboT: 0, dashT: 0, dashDir: new THREE.Vector3(), kb: null,
   moving: false, curSpeed: 0, walkT: 0, seed: 0,
 };
@@ -957,6 +957,7 @@ function dealDamage(target, amount, src, o = {}) {
   if (target.isPlayer) {
     if (player.invuln > 0 || !player.alive) return 0;
     player.hp -= amount;
+    player.sinceHit = 0;
     floatText(player.pos.clone().setY(2.6), '-' + Math.round(amount), '#ff6b6b', 16);
     const f = $('flash'); f.style.opacity = Math.min(1, 0.4 + amount / player.maxHp * 3); setTimeout(() => f.style.opacity = 0, 130);
     if (amount > player.maxHp * 0.12) shake(0.35);
@@ -1309,8 +1310,29 @@ function inputDir() {
   return d;
 }
 
-function updatePlayer(dt) {
-  player.atkCd -= dt; player.invuln -= dt; player.comboT -= dt; player.slowT -= dt;
+// Out-of-combat healing: after 7 seconds without taking damage, Kael regenerates quickly.
+const REGEN_DELAY = 7, REGEN_RATE = 0.06; // 6% of max HP per second
+let regenTextT = 0;
+function updateRegen(dt) {
+  player.sinceHit += dt;
+  const ready = player.sinceHit >= REGEN_DELAY && player.hp < player.maxHp;
+  if (ready && !player.regenOn) {
+    floatText(player.pos.clone().setY(3), 'REGENERATING', '#4ade80', 17);
+    ringFX(player.pos, 0x22c55e, 3, 0.6);
+    regenTextT = 0;
+  }
+  player.regenOn = ready;
+  if (!ready) return;
+  const heal = player.maxHp * REGEN_RATE * dt;
+  player.hp = Math.min(player.maxHp, player.hp + heal);
+  if ((regenTextT -= dt) <= 0) {
+    regenTextT = 1;
+    floatText(player.pos.clone().setY(2.7), '+' + Math.round(player.maxHp * REGEN_RATE), '#4ade80', 14);
+    burstFX(player.pos.clone().setY(1), 0x22c55e, 4, 2);
+  }
+}
+
+function updatePlayer(dt) {  player.atkCd -= dt; player.invuln -= dt; player.comboT -= dt; player.slowT -= dt;
   for (const k in cds) cds[k] -= dt;
   if (player.attackT > 0) player.attackT -= dt / 0.28;
   if (!player.alive) {
@@ -1319,6 +1341,7 @@ function updatePlayer(dt) {
   }
   player.mp = Math.min(player.maxMp, player.mp + dt * (2.5 + player.level * 0.02));
   player.hp = Math.min(player.maxHp, player.hp + dt * (0.5 + player.level * 0.02) * (riftState === 'fighting' || riftState === 'boss' ? 1 : 10));
+  updateRegen(dt);
   if ((mouseHeld && document.pointerLockElement === canvas) || touchAttack) playerAttack();
   if (player.kb) { player.pos.addScaledVector(player.kb, dt); player.kb.multiplyScalar(Math.max(0, 1 - dt * 7)); if (player.kb.lengthSq() < 0.02) player.kb = null; }
 
@@ -2020,7 +2043,7 @@ function clearField() {
 function beginRun() {
   clearField();
   recalcStats();
-  player.alive = true; player.hp = player.maxHp; player.mp = player.maxMp; player.kb = null; player.slowT = 0;
+  player.alive = true; player.hp = player.maxHp; player.mp = player.maxMp; player.kb = null; player.slowT = 0; player.sinceHit = 0; player.regenOn = false;
   player.pos.set(0, 0, 0); player.rig.body.rotation.set(0, 0, 0);
   for (const k in cds) cds[k] = 0;
   buffT = 0;
@@ -2093,7 +2116,7 @@ function updateHUD() {
   $('activec').textContent = activeShadows().length;
   $('limit').textContent = armyLimit();
   $('recc').textContent = army.filter(a => a.status === 'recovering').length;
-  $('buff').textContent = [buffT > 0 ? `✦ Night Sovereignty — ${Math.ceil(buffT)}s` : '', player.slowT > 0 ? '❄ Slowed' : ''].filter(Boolean).join(' · ');
+  $('buff').textContent = [buffT > 0 ? `✦ Night Sovereignty — ${Math.ceil(buffT)}s` : '', player.slowT > 0 ? '❄ Slowed' : '', player.regenOn ? '✚ Regenerating' : player.hp < player.maxHp && player.alive ? `✚ Regen in ${Math.ceil(REGEN_DELAY - player.sinceHit)}s` : ''].filter(Boolean).join(' · ');
   $('riftName').textContent = rift ? `RIFT ${rift} · ${rift % 5 === 0 ? 'BOSS GATE' : rankOf(rift) + '-RANK'}` : 'PREPARING';
   $('riftInfo').textContent = riftState === 'boss' ? (bossQueue.length ? `Boss arriving: ${TYPES[bossQueue[0]].name}` : `Defeat the boss · ${enemiesAlive.length} enemies`)
     : riftState === 'fighting' ? `Enemies remaining: ${spawnQueue.length + enemiesAlive.length} · then the boss`
