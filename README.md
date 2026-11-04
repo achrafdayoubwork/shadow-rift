@@ -18,6 +18,11 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
     - **Crimson Duelist:** chained dash strikes, a parry stance that blocks and punishes close attacks (use ranged attacks), and mirror images.
     - **Rime Warden:** frost nova and ice lances that slow you, and below half HP a frozen armor shell inside a blizzard.
   - From rift 16, two guardians appear at once.
+  - **All bosses:**
+    - Below 20% HP they enter a **Last Stand**: 30% more damage, 25% less damage taken, faster abilities.
+    - If the fight lasts too long (100 s for guardians, 150 s for major bosses), they **enrage** permanently.
+    - After a stun they resist stuns for 8 seconds, and a stun can't cancel an attack they've already started.
+  - **Major boss extras:** the Colossus throws boulders at players who keep their distance, the Alpha chains its charges back to back, and the Lich's soulfire leaves burning ground below half HP.
 
 ## Controls
 

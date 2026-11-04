@@ -603,14 +603,14 @@ const TYPES = {
   orc:      { name: 'Orc Brute',       rank: 'C', hp: 500,   dmg: 19, speed: 3.1, range: 1.5, cd: 1.5, radius: 0.85, h: 2.9, armor: 0.25, slam: true },
   warlock:  { name: 'Rift Warlock',    rank: 'C', hp: 230,   dmg: 14, speed: 3.0, range: 11,  cd: 2.2, radius: 0.5,  h: 2.0, armor: 0.1, ranged: true, kite: true },
   knight:   { name: 'Fallen Knight',   rank: 'B', hp: 650,   dmg: 21, speed: 3.4, range: 1.6, cd: 1.15, radius: 0.7, h: 2.3, armor: 0.35, block: true },
-  colossus: { name: 'Rift Colossus',   rank: 'S', hp: 15000, dmg: 46, speed: 2.4, range: 2.6, cd: 2.1, radius: 1.9,  h: 7.2, armor: 0.5, boss: true, ccImmune: true },
-  alpha:    { name: 'Bloodfang Alpha', rank: 'S', hp: 11500, dmg: 34, speed: 6.8, range: 1.8, cd: 1.0, radius: 1.5,  h: 3.4, armor: 0.35, boss: true },
-  lich:     { name: 'Ashen Lich',      rank: 'S', hp: 10000, dmg: 28, speed: 3.0, range: 14,  cd: 1.7, radius: 0.9,  h: 3.4, armor: 0.35, boss: true, ranged: true, kite: true },
+  colossus: { name: 'Rift Colossus',   rank: 'S', hp: 20000, dmg: 54, speed: 2.6, range: 2.6, cd: 1.9, radius: 1.9,  h: 7.2, armor: 0.5, boss: true, ccImmune: true },
+  alpha:    { name: 'Bloodfang Alpha', rank: 'S', hp: 15000, dmg: 40, speed: 7.2, range: 1.8, cd: 0.9, radius: 1.5,  h: 3.4, armor: 0.38, boss: true },
+  lich:     { name: 'Ashen Lich',      rank: 'S', hp: 13000, dmg: 33, speed: 3.2, range: 14,  cd: 1.5, radius: 0.9,  h: 3.4, armor: 0.38, boss: true, ranged: true, kite: true },
   // Rift Guardians: the boss waiting at the end of every rift that isn't a major boss gate.
-  warchief:    { name: 'Goblin Warchief', rank: 'A', hp: 2600, dmg: 16, speed: 3.4, range: 1.7, cd: 1.3, radius: 0.9, h: 2.7, armor: 0.3,  boss: true, guardian: true },
-  warden:      { name: 'Rime Warden',     rank: 'A', hp: 2900, dmg: 17, speed: 2.6, range: 10,  cd: 2.0, radius: 1.0, h: 3.0, armor: 0.35, boss: true, guardian: true, ranged: true, kite: true },
-  duelist:     { name: 'Crimson Duelist', rank: 'A', hp: 2400, dmg: 19, speed: 4.6, range: 1.6, cd: 0.9, radius: 0.7, h: 2.3, armor: 0.25, boss: true, guardian: true },
-  broodmother: { name: 'Brood Mother',    rank: 'A', hp: 3200, dmg: 17, speed: 3.6, range: 1.8, cd: 1.4, radius: 1.5, h: 3.0, armor: 0.3,  boss: true, guardian: true },
+  warchief:    { name: 'Goblin Warchief', rank: 'A', hp: 3600, dmg: 19, speed: 3.6, range: 1.7, cd: 1.2, radius: 0.9, h: 2.7, armor: 0.33, boss: true, guardian: true },
+  warden:      { name: 'Rime Warden',     rank: 'A', hp: 4000, dmg: 20, speed: 2.8, range: 10,  cd: 1.8, radius: 1.0, h: 3.0, armor: 0.38, boss: true, guardian: true, ranged: true, kite: true },
+  duelist:     { name: 'Crimson Duelist', rank: 'A', hp: 3300, dmg: 22, speed: 4.9, range: 1.6, cd: 0.8, radius: 0.7, h: 2.3, armor: 0.28, boss: true, guardian: true },
+  broodmother: { name: 'Brood Mother',    rank: 'A', hp: 4400, dmg: 20, speed: 3.8, range: 1.8, cd: 1.3, radius: 1.5, h: 3.0, armor: 0.33, boss: true, guardian: true },
 };
 const RANK_IDX = { E: 0, D: 1, C: 2, B: 3, A: 4, S: 5 };
 const DEPLOY_COST = { E: 8, D: 12, C: 20, B: 30, A: 50, S: 80 };
@@ -921,8 +921,8 @@ function spawnUnit(type, team, pos, extra = {}) {
   scene.add(rig.root);
   let hpMul, dmgMul;
   if (team === 'enemy') {
-    if (T.guardian) { hpMul = 1 + 0.55 * (rift - 1); dmgMul = 1 + 0.22 * (rift - 1); }
-    else if (T.boss) { const cyc = Math.max(1, Math.floor(rift / 5)); hpMul = 1 + 0.5 * (cyc - 1); dmgMul = 1 + 0.2 * (cyc - 1); }
+    if (T.guardian) { hpMul = 1 + 0.65 * (rift - 1); dmgMul = 1 + 0.25 * (rift - 1); }
+    else if (T.boss) { const cyc = Math.max(1, Math.floor(rift / 5)); hpMul = 1 + 0.6 * (cyc - 1); dmgMul = 1 + 0.25 * (cyc - 1); }
     else { hpMul = 1 + 0.6 * (rift - 1); dmgMul = 1 + 0.22 * (rift - 1); }
     if (extra.elite) { hpMul *= 2.2; dmgMul *= 1.4; }
   } else {
@@ -950,7 +950,7 @@ function spawnUnit(type, team, pos, extra = {}) {
   units.push(u);
   return u;
 }
-const unitDmg = u => u.dmg * (u.team === 'shadow' && buffT > 0 ? 1.6 : 1) * (u.rageT > 0 ? 1.4 : 1);
+const unitDmg = u => u.dmg * (u.team === 'shadow' && buffT > 0 ? 1.6 : 1) * (u.rageT > 0 ? 1.4 : 1) * (u.lastStand ? 1.3 : 1);
 const unitSpeed = u => u.speed * (u.team === 'shadow' && buffT > 0 ? 1.35 : 1) * (u.rageT > 0 ? 1.3 : 1) * (u.slowT > 0 ? 0.5 : 1);
 
 function dealDamage(target, amount, src, o = {}) {
@@ -980,6 +980,7 @@ function dealDamage(target, amount, src, o = {}) {
   amount *= 1 - Math.min(0.9, target.armor + (target.armorBoostT > 0 ? 0.4 : 0));
   let tag = '';
   if (target.shielded) { amount *= 0.08; tag = 'SHIELDED '; }
+  if (target.lastStand) amount *= 0.75;
   if (T.block && !o.noBlock && target.stun <= 0 && target.attackT <= 0 && src?.pos) {
     const to = src.pos.clone().sub(target.pos).setY(0).normalize();
     if (fwdOf(target).dot(to) > 0.4) { amount *= 0.3; tag = 'BLOCK '; sfx('block'); }
@@ -1253,7 +1254,8 @@ function gravebind() {
     const T = TYPES[e.type];
     if (!T.boss) e.kb = center.clone().sub(e.pos).setY(0).multiplyScalar(5.5);
     e.stun = Math.max(e.stun, T.ccImmune ? 0 : T.boss ? 0.6 : 2.2);
-    e.pending = null; e.windup = null; e.charge = null;
+    // Enemy bosses are unstoppable: a stun pauses them but can't cancel an attack already under way.
+    if (!(T.boss && e.team === 'enemy')) { e.pending = null; e.windup = null; e.charge = null; }
     dealDamage(e, pDmg() * 1.2, player, { noBlock: true });
     beamFX(center.clone().setY(1), e.pos.clone().setY(1), 0x8b5cf6);
     n++;
@@ -1420,6 +1422,8 @@ function summonMinions(u, list) {
 // Boss phases and special attacks. Returns true when the boss used its turn.
 function bossAI(u, tg, d, dt) {
   const ai = u.ai, enemy = u.team === 'enemy', frac = u.hp / u.maxHp, T = TYPES[u.type];
+  // Boss abilities recharge faster, and faster still in Last Stand.
+  if (enemy) dt *= u.lastStand ? 1.4 : 1.15;
   if (enemy) {
     if (u.type === 'colossus') {
       if (frac < 0.5 && ai.phase < 2) { ai.phase = 2; u.speed *= 1.35; u.cd *= 0.7; bigText('ENRAGED', 'The Colossus quickens'); sfx('roar'); shake(0.6); }
@@ -1458,10 +1462,30 @@ function bossAI(u, tg, d, dt) {
       if (enemy) floatText(u.pos.clone().setY(T.h), 'GROUND SLAM', '#fca5a5', 20);
       return true;
     }
+    // Hurls rift boulders at anyone who keeps their distance.
+    ai.rockT = (ai.rockT ?? 1.5) - dt;
+    if (enemy && ai.rockT <= 0 && d > 9 && d < 30) {
+      ai.rockT = ai.phase >= 2 ? 5 : 7;
+      const spots = [tg.pos.clone(), scatter(tg.pos, 3.5), ...(ai.phase >= 2 ? [scatter(tg.pos, 4), scatter(tg.pos, 4)] : [])];
+      for (const p of spots) telegraph({ pos: p, r: 3, t: 1.3, team: u.team, dmg: unitDmg(u) * 1.3, src: u, kb: 9, shake: 0.3 });
+      say(u, 'BOULDER TOSS', '#fca5a5');
+      u.windup = { t: 0.7, fn: () => { u.attackT = 1; } };
+      return true;
+    }
   } else if (u.type === 'alpha') {
     ai.chargeT -= dt;
+    // From phase 2 the Alpha chains a second charge straight after the first.
+    if (ai.chainLeft > 0 && !u.charge && d > 2) {
+      ai.chainLeft--;
+      const dir = tg.pos.clone().sub(u.pos).setY(0).normalize();
+      u.root.rotation.y = Math.atan2(dir.x, dir.z);
+      telegraph({ pos: u.pos.clone(), rect: { dir, len: 20, width: u.radius * 2 + 1 }, t: 0.6, team: u.team, dmg: 0 });
+      u.windup = { t: 0.6, fn: () => startCharge(u, dir, 20, 32, unitDmg(u) * 1.6) };
+      return true;
+    }
     if (ai.chargeT <= 0 && d > 3 && d < 24) {
       ai.chargeT = ai.phase >= 3 ? 3.5 : ai.phase >= 2 ? 5 : 7;
+      if (enemy) ai.chainLeft = ai.phase >= 3 ? 2 : ai.phase >= 2 ? 1 : 0;
       const dir = tg.pos.clone().sub(u.pos).setY(0).normalize();
       u.root.rotation.y = Math.atan2(dir.x, dir.z);
       telegraph({ pos: u.pos.clone(), rect: { dir, len: 20, width: u.radius * 2 + 1 }, t: 0.9, team: u.team, dmg: 0 });
@@ -1475,7 +1499,9 @@ function bossAI(u, tg, d, dt) {
       ai.meteorT = frac < 0.5 ? 8 : 11;
       const pool = (enemy ? foesOfEnemy : enemiesAlive).filter(isAlive);
       const picks = [tg, ...pool.sort(() => Math.random() - 0.5)].slice(0, enemy ? 6 : 4);
-      for (const o of new Set(picks)) telegraph({ pos: o.pos.clone(), r: 2.8, t: 1.6, team: u.team, dmg: unitDmg(u) * 1.7, src: u, kb: 6, shake: 0.2 });
+      // Below half HP the soulfire scorches the ground where it lands.
+      const scorch = enemy && frac < 0.5 ? { r: 2.6, life: 5, dps: unitDmg(u) * 0.5, color: 0x00ffcc } : undefined;
+      for (const o of new Set(picks)) telegraph({ pos: o.pos.clone(), r: 2.8, t: 1.6, team: u.team, dmg: unitDmg(u) * 1.7, src: u, kb: 6, shake: 0.2, pool: scorch });
       u.windup = { t: 0.6, fn: () => { u.attackT = 1; } };
       if (enemy) floatText(u.pos.clone().setY(T.h), 'SOULFIRE RAIN', '#5eead4', 20);
       return true;
@@ -1602,6 +1628,20 @@ function guardianAI(u, tg, d, dt) {
   return false;
 }
 
+// Every enemy boss: Last Stand below 20% HP, and a hard enrage if the fight drags on.
+function bossPressure(u, T, dt) {
+  const ai = u.ai;
+  if (u.hp / u.maxHp < 0.2 && !u.lastStand) {
+    u.lastStand = true;
+    setAura(u, 'stand', 0xff2a2a, T.radius + 1.0);
+    bigText('LAST STAND', `The ${T.name} fights harder and takes less damage`); sfx('roar'); shake(0.6);
+  }
+  ai.fightT = (ai.fightT || 0) + dt;
+  const limit = T.guardian ? 100 : 150;
+  if (ai.fightT > limit - 20 && !ai.enrageWarn) { ai.enrageWarn = true; notify('<b>Enrage in 20 seconds</b>: finish the boss quickly!', 'gold'); }
+  if (ai.fightT > limit && !ai.enraged) { ai.enraged = true; u.rageT = 1e9; u.cd *= 0.75; bigText('ENRAGED', 'You took too long'); sfx('roar'); shake(0.7); }
+}
+
 function makeMirrorImage(m, real) {
   m.clone = true; m.ai = null;
   m.maxHp = m.hp = real.maxHp * 0.12;
@@ -1628,7 +1668,13 @@ function updateUnit(u, dt) {
   // Enemies left alone for 4s regenerate, so you have to keep the pressure on.
   if (u.team === 'enemy') {
     u.sinceHit = (u.sinceHit || 0) + dt;
-    if (u.sinceHit > 4 && u.hp < u.maxHp) u.hp = Math.min(u.maxHp, u.hp + u.maxHp * (T.boss ? 0.01 : 0.03) * dt);
+    if (u.sinceHit > 4 && u.hp < u.maxHp) u.hp = Math.min(u.maxHp, u.hp + u.maxHp * (T.boss ? 0.02 : 0.03) * dt);
+    if (T.boss && u.ai) bossPressure(u, T, dt);
+    // After being stunned, a boss shrugs off stuns for 8 seconds.
+    if (T.boss) {
+      if (u.ccResT > 0) { u.ccResT -= dt; if (u.stun > 0) { u.stun = 0; floatText(u.pos.clone().setY(T.h + 0.2), 'RESIST', '#94a3b8', 15); } }
+      else if (u.stun > 0 && u.stun <= dt) u.ccResT = 8;
+    }
   }
   if (u.stun > 0) {
     u.stun -= dt; u.pending = null; u.moving = false;
