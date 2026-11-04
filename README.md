@@ -9,7 +9,7 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 - **Every kill gives you a level.** Your HP, mana, strength and army size grow as you fight.
 - **Recover between fights.** If you take no damage for 7 seconds, you heal quickly (6% of max HP per second). The next hit you take stops the healing.
 - **Arise.** Press **R**, or turn on voice with **V** and say "Arise!", to raise nearby fallen enemies as shadow soldiers. Each body fades after a short time, and raising it can fail.
-- **Build an army.** Your shadows are saved between sessions. When a shadow falls, it has to reform over time and then costs mana to deploy again.
+- **Build an army.** Your shadows are saved between sessions. When a shadow falls, it has to reform over time and then costs mana to deploy again. You can have at most 20 shadows on the field at once (the limit starts lower and grows with your level); the rest wait in reserve.
 - **Your army has a price.** Each shadow you own makes rift enemies 5% tougher and 2.5% stronger, up to 40 shadows. The rift panel shows the current bonus.
 - **Mana is scarce.** It refills slowly (about 1 per second), so choose your abilities and deployments carefully.
 - **Read the attacks.** Enemies wind up with a glowing flare in their weapon hand before each hit, and red energy gathers around them before a special attack.

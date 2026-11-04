@@ -701,7 +701,8 @@ function recalcStats() {
   player.str = 12 + L * 0.6; player.speed = 7 + Math.min(2.5, L * 0.03);
   aura.intensity = 6 + Math.min(20, L * 0.2);
 }
-const armyLimit = () => Math.min(40, 3 + Math.floor(player.level / 3));
+const MAX_DEPLOYED = 20; // hard cap on shadows on the field at once
+const armyLimit = () => Math.min(MAX_DEPLOYED, 3 + Math.floor(player.level / 3));
 const pDmg = () => player.str * (buffT > 0 ? 1.25 : 1);
 
 // ================================================================ save
@@ -1151,7 +1152,7 @@ function deployArmy(free = false) {
     return;
   }
   let slots = armyLimit() - activeShadows().length;
-  if (slots <= 0) { notify(`Deployment limit reached (${armyLimit()}). It grows with your level.`); return; }
+  if (slots <= 0) { notify(armyLimit() >= MAX_DEPLOYED ? `Deployment limit reached: at most ${MAX_DEPLOYED} shadows can fight at once.` : `Deployment limit reached (${armyLimit()}). It grows with your level, up to ${MAX_DEPLOYED}.`); return; }
   ready.sort((a, b) => RANK_IDX[TYPES[b.type].rank] - RANK_IDX[TYPES[a.type].rank]);
   let n = 0, spent = 0, blocked = null, i = activeShadows().length;
   for (const e of ready) {
@@ -2009,7 +2010,7 @@ function renderArmyPanel() {
     else st = 'ready';
     return `<tr><td><b>${a.name}</b></td><td>${T.name}</td><td>${T.rank}</td><td>${DEPLOY_COST[T.rank]} MP</td><td class="st-${a.status}">${st}</td></tr>`;
   }).join('');
-  $('army').innerHTML = `<h2>SHADOW ARMY</h2><div class="sub">${army.length} soldiers · can deploy ${armyLimit()} at once (grows with level) · Q deploys ready shadows for mana · fallen shadows must reform before they can be deployed again</div>
+  $('army').innerHTML = `<h2>SHADOW ARMY</h2><div class="sub">${army.length} soldiers · can deploy ${armyLimit()} at once (grows with level, max ${MAX_DEPLOYED}) · Q deploys ready shadows for mana · fallen shadows must reform before they can be deployed again</div>
     ${army.length ? `<table><tr><th>Name</th><th>Origin</th><th>Rank</th><th>Deploy</th><th>Status</th></tr>${rows}</table>` : '<p>No shadows yet. Defeat an enemy and press <b>R</b> or say <b>"Arise"</b> near its body.</p>'}`;
 }
 
