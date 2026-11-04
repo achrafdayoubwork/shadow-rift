@@ -30,6 +30,18 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 | Tab | Shadow army roster |
 | P | Pause |
 
+### On a phone or tablet
+
+Open the same link on your phone and turn it sideways. On-screen touch controls appear automatically:
+
+- **Left side:** drag to move (joystick)
+- **Right side:** drag to look around; pinch to zoom
+- **⚔ button:** hold to attack. Attacks aim at the nearest enemy automatically.
+- **Button ring:** Dash, Shadow Rend, Umbral Step, Gravebind, Daggers, Sovereign, Siphon and **ARISE**
+- **Top row:** Deploy, Recall, Army roster, Voice ("Arise!") and Pause
+
+The game pauses while the phone is held upright. Graphics quality is lowered slightly on phones so the game runs more smoothly.
+
 ## Running locally
 
 Open `index.html` in Chrome or Edge. You need an internet connection, because the game loads Three.js and the character models from the web.
