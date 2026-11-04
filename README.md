@@ -9,7 +9,14 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 - **Every kill gives you a level.** Your HP, mana, strength and army size grow as you fight.
 - **Arise.** Press **R**, or turn on voice with **V** and say "Arise!", to raise nearby fallen enemies as shadow soldiers. Each body fades after a short time, and raising it can fail.
 - **Build an army.** Your shadows are saved between sessions. When a shadow falls, it has to reform over time and then costs mana to deploy again.
-- **Clear the rifts.** Waves of goblins, dire wolves, orc brutes, warlocks and armored knights come through rift portals. Every 5th rift has a boss: the Rift Colossus, the Bloodfang Alpha or the Ashen Lich. Each boss has phases and attacks that warn you with red zones on the ground.
+- **Clear the rifts.** Waves of goblins, dire wolves, orc brutes, warlocks and armored knights come through rift portals. **Every rift ends with a boss.** Bosses have phases, and their big attacks show a red warning zone on the ground before they hit.
+  - **Every 5th rift** ends with a major boss: the Rift Colossus, the Bloodfang Alpha or the Ashen Lich.
+  - **Every other rift** ends with a Rift Guardian:
+    - **Goblin Warchief:** a war cry that enrages nearby enemies, fire bombs that leave burning ground, goblin reinforcements, and permanent bloodlust below 30% HP.
+    - **Brood Mother:** venom spit that leaves poison pools, waves of hatchlings, and below half HP it burrows and erupts beneath you.
+    - **Crimson Duelist:** chained dash strikes, a parry stance that blocks and punishes close attacks (use ranged attacks), and mirror images.
+    - **Rime Warden:** frost nova and ice lances that slow you, and below half HP a frozen armor shell inside a blizzard.
+  - From rift 16, two guardians appear at once.
 
 ## Controls
 

@@ -364,6 +364,10 @@ const LOOKS = {
   colossus: { base: 'soldier', h: 7.2,  tint: 0xa06a48, emissive: 0x1a0800, eyes: 0xffaa00, weapons: [['R', 'club']], horns: 0xe5e0cc },
   alpha:    { base: 'fox',     h: 3.4,  tint: 0x8a2020, emissive: 0x200000 },
   lich:     { base: 'soldier', h: 3.4,  tint: 0x3c3c50, emissive: 0x061a18, eyes: 0x00ffcc, weapons: [['R', 'staff']], horns: 0x222230, orb: 0x00ffcc },
+  warchief:    { base: 'soldier', h: 2.7, tint: 0x6f8f2a, emissive: 0x140800, eyes: 0xff2a2a, weapons: [['R', 'axe'], ['L', 'shield']], horns: 0xd6c9a8 },
+  warden:      { base: 'soldier', h: 3.0, tint: 0xa8dcff, emissive: 0x0a2a44, eyes: 0x7dd3fc, weapons: [['R', 'staff']], horns: 0xdbeafe, orb: 0x7dd3fc },
+  duelist:     { base: 'soldier', h: 2.3, tint: 0x9a1c30, emissive: 0x1a0006, eyes: 0xff3355, weapons: [['R', 'sword'], ['L', 'sword']] },
+  broodmother: { base: 'fox',     h: 3.0, tint: 0x4f7f22, emissive: 0x0a2000 },
 };
 const gltfs = {}, templates = {};
 let MODELS_OK = false;
@@ -559,6 +563,10 @@ const FALLBACK = {
   colossus: sh => makeHumanoid({ shadow: sh, scale: 3.1, skin: 0x8a6a4a, cloth: 0x4a3520, eye: 0xffaa00, horns: true, weapon: 'club' }),
   alpha:    sh => makeWolf(sh, 2.2, 0x7a1f1f),
   lich:     sh => makeHumanoid({ shadow: sh, scale: 1.45, skin: 0x9aa0a0, cloth: 0x222233, eye: 0x00ffcc, hood: true, horns: true, weapon: 'staff', orb: 0x00ffcc }),
+  warchief:    sh => makeHumanoid({ shadow: sh, scale: 1.2, skin: 0x6b8e23, cloth: 0x5a3b1e, eye: 0xff2a2a, horns: true, weapon: 'axe', offhand: 'shield' }),
+  warden:      sh => makeHumanoid({ shadow: sh, scale: 1.3, skin: 0xbfe3ff, cloth: 0x1e3a5f, eye: 0x7dd3fc, hood: true, horns: true, weapon: 'staff', orb: 0x7dd3fc }),
+  duelist:     sh => makeHumanoid({ shadow: sh, scale: 1.0, skin: 0xd9b8a0, cloth: 0x7f1d1d, eye: 0xff3355, helmet: true, weapon: 'sword', offhand: 'sword' }),
+  broodmother: sh => makeWolf(sh, 1.9, 0x4d7c0f),
 };
 function animRig(u, dt) {
   const rig = u.rig;
@@ -598,12 +606,17 @@ const TYPES = {
   colossus: { name: 'Rift Colossus',   rank: 'S', hp: 15000, dmg: 46, speed: 2.4, range: 2.6, cd: 2.1, radius: 1.9,  h: 7.2, armor: 0.5, boss: true, ccImmune: true },
   alpha:    { name: 'Bloodfang Alpha', rank: 'S', hp: 11500, dmg: 34, speed: 6.8, range: 1.8, cd: 1.0, radius: 1.5,  h: 3.4, armor: 0.35, boss: true },
   lich:     { name: 'Ashen Lich',      rank: 'S', hp: 10000, dmg: 28, speed: 3.0, range: 14,  cd: 1.7, radius: 0.9,  h: 3.4, armor: 0.35, boss: true, ranged: true, kite: true },
+  // Rift Guardians: the boss waiting at the end of every rift that isn't a major boss gate.
+  warchief:    { name: 'Goblin Warchief', rank: 'A', hp: 2600, dmg: 16, speed: 3.4, range: 1.7, cd: 1.3, radius: 0.9, h: 2.7, armor: 0.3,  boss: true, guardian: true },
+  warden:      { name: 'Rime Warden',     rank: 'A', hp: 2900, dmg: 17, speed: 2.6, range: 10,  cd: 2.0, radius: 1.0, h: 3.0, armor: 0.35, boss: true, guardian: true, ranged: true, kite: true },
+  duelist:     { name: 'Crimson Duelist', rank: 'A', hp: 2400, dmg: 19, speed: 4.6, range: 1.6, cd: 0.9, radius: 0.7, h: 2.3, armor: 0.25, boss: true, guardian: true },
+  broodmother: { name: 'Brood Mother',    rank: 'A', hp: 3200, dmg: 17, speed: 3.6, range: 1.8, cd: 1.4, radius: 1.5, h: 3.0, armor: 0.3,  boss: true, guardian: true },
 };
 const RANK_IDX = { E: 0, D: 1, C: 2, B: 3, A: 4, S: 5 };
-const DEPLOY_COST = { E: 8, D: 12, C: 20, B: 30, S: 80 };
-const RECOVER_TIME = { E: 20, D: 30, C: 40, B: 55, S: 150 };
+const DEPLOY_COST = { E: 8, D: 12, C: 20, B: 30, A: 50, S: 80 };
+const RECOVER_TIME = { E: 20, D: 30, C: 40, B: 55, A: 100, S: 150 };
 const SHADOW_NAMES = ['Grim', 'Vex', 'Ashen', 'Morrow', 'Fang', 'Tusk', 'Rook', 'Wraith', 'Cinder', 'Hollow', 'Onyx', 'Dusk', 'Raze', 'Thorn', 'Gloom', 'Nox', 'Mire', 'Sable', 'Husk', 'Vigil'];
-const SPECIAL_NAMES = { colossus: ['Behemoth', 'Monolith'], alpha: ['Crimson Maw', 'Nightfang'], lich: ['Hollow King', 'Pale Regent'], knight: ['Sir Vael', 'Oathbreaker', 'Grimguard', 'Black Aegis'] };
+const SPECIAL_NAMES = { colossus: ['Behemoth', 'Monolith'], alpha: ['Crimson Maw', 'Nightfang'], lich: ['Hollow King', 'Pale Regent'], warchief: ['Gorrak', 'Ironjaw'], warden: ['Frostveil', 'Hoarfang'], duelist: ['Scarlet Edge', 'Vesper'], broodmother: ['Venomqueen', 'Mother Mire'], knight: ['Sir Vael', 'Oathbreaker', 'Grimguard', 'Black Aegis'] };
 
 // ================================================================ abilities
 const AB = {
@@ -675,7 +688,7 @@ const joy = { active: false, x: 0, y: 0 };
 
 const player = {
   isPlayer: true, rig: null, root: new THREE.Group(), team: 'shadow', radius: 0.5,
-  level: 1, hp: 160, maxHp: 160, mp: 90, maxMp: 90, str: 12, speed: 7, alive: true, stun: 0,
+  level: 1, hp: 160, maxHp: 160, mp: 90, maxMp: 90, str: 12, speed: 7, alive: true, stun: 0, slowT: 0,
   invuln: 0, atkCd: 0, attackT: 0, atkArm: 'R', combo: 0, comboT: 0, dashT: 0, dashDir: new THREE.Vector3(), kb: null,
   moving: false, curSpeed: 0, walkT: 0, seed: 0,
 };
@@ -832,6 +845,7 @@ function resolveTelegraph(tg) {
       }
       if (!hit) continue;
       dealDamage(o, tg.dmg, tg.src, { noBlock: true });
+      if (tg.slow) applySlow(o, tg.slow);
       if (tg.kb) {
         const dir = o.pos.clone().sub(tg.pos).setY(0); if (dir.lengthSq() < 0.01) dir.set(1, 0, 0);
         dir.normalize().multiplyScalar(tg.kb);
@@ -843,8 +857,60 @@ function resolveTelegraph(tg) {
     ringFX(tg.pos, tg.team === 'enemy' ? 0xff4422 : 0xa855f7, tg.r, 0.4);
     burstFX(tg.pos.clone().setY(0.4), tg.team === 'enemy' ? 0xff6a3d : 0xa855f7, tg.r > 5 ? 18 : 8, 7);
   }
+  if (tg.pool) hazard({ ...tg.pool, pos: tg.pos.clone(), team: tg.team, src: tg.src });
   if (tg.shake) shake(tg.shake);
   if (tg.dmg > 0) sfx('slam');
+}
+
+// Lingering ground hazards (fire, venom, blizzard) that hurt anything of the other side standing in them.
+let hazards = [];
+function hazard(o) {
+  const geo = new THREE.CircleGeometry(o.r, 40); geo.rotateX(-Math.PI / 2);
+  const m = new THREE.Mesh(geo, fxMat(o.color ?? 0xff7a1a, 0.35));
+  m.position.set(o.pos.x, 0.05, o.pos.z); scene.add(m);
+  hazards.push({ ...o, m, tick: 0.25, max: o.life });
+}
+function updateHazards(dt) {
+  hazards = hazards.filter(h => {
+    h.life -= dt; h.tick -= dt;
+    h.m.material.opacity = (0.25 + 0.12 * Math.sin(time * 6)) * Math.min(1, h.life);
+    if (h.tick <= 0) {
+      h.tick = 0.5;
+      const pool = h.team === 'enemy' ? foesOfEnemy : enemiesAlive;
+      for (const o of pool) {
+        if (!isAlive(o) || dist2D(o.pos, h.pos) > h.r + o.radius * 0.5) continue;
+        dealDamage(o, h.dps * 0.5, h.src, { noBlock: true, quiet: true });
+        if (h.slow) applySlow(o, 1);
+      }
+    }
+    if (h.life > 0) return true;
+    disposeObj(h.m);
+    return false;
+  });
+}
+function applySlow(o, t) {
+  if (o.isPlayer) { if (player.slowT <= 0) floatText(player.pos.clone().setY(2.9), 'SLOWED', '#7dd3fc', 15); player.slowT = Math.max(player.slowT, t); }
+  else if (!TYPES[o.type].boss) o.slowT = Math.max(o.slowT || 0, t);
+}
+// Glowing shells around a unit (parry stance, frost armor, lich shield) that follow it around.
+function setAura(u, key, color, radius) {
+  u.auras = u.auras || {};
+  if (u.auras[key]) { disposeObj(u.auras[key]); delete u.auras[key]; }
+  if (color == null) return;
+  const m = new THREE.Mesh(new THREE.SphereGeometry(radius, 24, 16), fxMat(color, 0.2));
+  scene.add(m); u.auras[key] = m;
+}
+function clearAuras(u) { for (const k in u.auras || {}) disposeObj(u.auras[k]); u.auras = {}; }
+function warCry(u) {
+  const allies = u.team === 'enemy' ? enemiesAlive : activeShadows();
+  for (const a of allies) {
+    if (a === u || !a.alive || dist2D(a.pos, u.pos) > 16) continue;
+    a.rageT = Math.max(a.rageT || 0, 6);
+    floatText(a.pos.clone().setY(TYPES[a.type].h + 0.3), 'ENRAGED', '#f87171', 13);
+  }
+  u.rageT = Math.max(u.rageT || 0, 6);
+  ringFX(u.pos, 0xef4444, 16, 0.8); sfx('roar'); shake(0.3);
+  if (u.team === 'enemy') floatText(u.pos.clone().setY(TYPES[u.type].h + 0.4), 'WAR CRY', '#fca5a5', 20);
 }
 
 // ================================================================ units
@@ -855,7 +921,8 @@ function spawnUnit(type, team, pos, extra = {}) {
   scene.add(rig.root);
   let hpMul, dmgMul;
   if (team === 'enemy') {
-    if (T.boss) { const cyc = Math.max(1, Math.floor(rift / 5)); hpMul = 1 + 0.5 * (cyc - 1); dmgMul = 1 + 0.2 * (cyc - 1); }
+    if (T.guardian) { hpMul = 1 + 0.55 * (rift - 1); dmgMul = 1 + 0.22 * (rift - 1); }
+    else if (T.boss) { const cyc = Math.max(1, Math.floor(rift / 5)); hpMul = 1 + 0.5 * (cyc - 1); dmgMul = 1 + 0.2 * (cyc - 1); }
     else { hpMul = 1 + 0.6 * (rift - 1); dmgMul = 1 + 0.22 * (rift - 1); }
     if (extra.elite) { hpMul *= 2.2; dmgMul *= 1.4; }
   } else {
@@ -883,8 +950,8 @@ function spawnUnit(type, team, pos, extra = {}) {
   units.push(u);
   return u;
 }
-const unitDmg = u => u.dmg * (u.team === 'shadow' && buffT > 0 ? 1.6 : 1);
-const unitSpeed = u => u.speed * (u.team === 'shadow' && buffT > 0 ? 1.35 : 1);
+const unitDmg = u => u.dmg * (u.team === 'shadow' && buffT > 0 ? 1.6 : 1) * (u.rageT > 0 ? 1.4 : 1);
+const unitSpeed = u => u.speed * (u.team === 'shadow' && buffT > 0 ? 1.35 : 1) * (u.rageT > 0 ? 1.3 : 1) * (u.slowT > 0 ? 0.5 : 1);
 
 function dealDamage(target, amount, src, o = {}) {
   if (target.isPlayer) {
@@ -897,9 +964,19 @@ function dealDamage(target, amount, src, o = {}) {
     if (player.hp <= 0) playerDie();
     return amount;
   }
-  if (!target.alive || target.rising > 0) return 0;
+  if (!target.alive || target.rising > 0 || target.burrowed) return 0;
   const T = TYPES[target.type];
-  amount *= 1 - target.armor;
+  // Parry stance: blocks everything from close range and strikes back. Ranged attacks get through.
+  if (target.parryT > 0 && src?.pos && dist2D(src.pos, target.pos) < 6) {
+    floatText(target.pos.clone().setY(T.h * 0.8), 'PARRIED', '#fde68a', 16);
+    if (time - (target.lastCounter || -9) > 0.45 && isAlive(src)) {
+      target.lastCounter = time; target.attackT = 1;
+      sfx('block'); burstFX(src.pos.clone().setY(1.2), 0xfbbf24, 6, 4);
+      dealDamage(src, unitDmg(target) * 0.9, target, { noBlock: true });
+    }
+    return 0;
+  }
+  amount *= 1 - Math.min(0.9, target.armor + (target.armorBoostT > 0 ? 0.4 : 0));
   let tag = '';
   if (target.shielded) { amount *= 0.08; tag = 'SHIELDED '; }
   if (T.block && !o.noBlock && target.stun <= 0 && target.attackT <= 0 && src?.pos) {
@@ -909,7 +986,7 @@ function dealDamage(target, amount, src, o = {}) {
   target.hp -= amount;
   target.sinceHit = 0;
   const col = target.team === 'enemy' ? (tag ? '#94a3b8' : o.crit ? '#fde047' : '#ffffff') : '#d8b4fe';
-  floatText(target.pos.clone().setY(T.h * 0.8), tag + Math.round(amount) + (o.crit ? '!' : ''), col, o.crit ? 22 : 15);
+  if (!o.quiet || Math.random() < 0.3) floatText(target.pos.clone().setY(T.h * 0.8), tag + Math.round(amount) + (o.crit ? '!' : ''), col, o.crit ? 22 : 15);
   if (target.hp <= 0) killUnit(target, src);
   return amount;
 }
@@ -918,8 +995,14 @@ function killUnit(u, src) {
   u.alive = false; u.bar.remove();
   u.pending = u.windup = u.charge = null;
   if (u.shieldMesh) { disposeObj(u.shieldMesh); u.shieldMesh = null; }
+  clearAuras(u);
   const T = TYPES[u.type];
   burstFX(u.pos.clone().setY(1), u.team === 'enemy' ? 0xff4444 : 0x8b5cf6, T.boss ? 40 : 12);
+  if (u.clone) { // mirror images shatter: no body, no level
+    u.rig.dispose?.(); disposeObj(u.root);
+    floatText(u.pos.clone().setY(1.6), 'SHATTERED', '#fda4af', 15);
+    return;
+  }
   if (u.team === 'enemy') {
     u.corpseT = T.boss ? 25 : 15; u.attempts = T.boss ? 2 : 3; u.fallT = 0; u.extracting = false;
     const marker = new THREE.Mesh(new THREE.RingGeometry(0.6, 0.8, 32), fxMat(0x9b5cff, 0.7));
@@ -992,7 +1075,8 @@ function arise() {
 function resolveExtraction(c) {
   if (!corpses.includes(c)) return;
   const T = TYPES[c.type];
-  const chance = T.boss ? Math.min(0.5, 0.18 + player.level * 0.0015) : c.elite ? 0.6 : 0.85;
+  const chance = T.guardian ? Math.min(0.6, 0.3 + player.level * 0.002)
+    : T.boss ? Math.min(0.5, 0.18 + player.level * 0.0015) : c.elite ? 0.6 : 0.85;
   if (Math.random() < chance) {
     removeCorpse(c);
     const entry = { id: ++armyIdSeq, type: c.type, name: pickName(c.type), status: 'stored', recover: 0 };
@@ -1226,7 +1310,7 @@ function inputDir() {
 }
 
 function updatePlayer(dt) {
-  player.atkCd -= dt; player.invuln -= dt; player.comboT -= dt;
+  player.atkCd -= dt; player.invuln -= dt; player.comboT -= dt; player.slowT -= dt;
   for (const k in cds) cds[k] -= dt;
   if (player.attackT > 0) player.attackT -= dt / 0.28;
   if (!player.alive) {
@@ -1234,7 +1318,7 @@ function updatePlayer(dt) {
     return;
   }
   player.mp = Math.min(player.maxMp, player.mp + dt * (2.5 + player.level * 0.02));
-  player.hp = Math.min(player.maxHp, player.hp + dt * (0.5 + player.level * 0.02) * (riftState === 'fighting' ? 1 : 10));
+  player.hp = Math.min(player.maxHp, player.hp + dt * (0.5 + player.level * 0.02) * (riftState === 'fighting' || riftState === 'boss' ? 1 : 10));
   if ((mouseHeld && document.pointerLockElement === canvas) || touchAttack) playerAttack();
   if (player.kb) { player.pos.addScaledVector(player.kb, dt); player.kb.multiplyScalar(Math.max(0, 1 - dt * 7)); if (player.kb.lengthSq() < 0.02) player.kb = null; }
 
@@ -1247,7 +1331,7 @@ function updatePlayer(dt) {
     if (Math.random() < 0.6) burstFX(player.pos.clone().setY(1.2), 0x7c3aed, 2, 2);
   } else if (dir.lengthSq() > 0) {
     dir.normalize();
-    const slow = player.attackT > 0 ? 0.45 : 1;
+    const slow = (player.attackT > 0 ? 0.45 : 1) * (player.slowT > 0 ? 0.5 : 1);
     player.curSpeed = player.speed * slow;
     player.pos.addScaledVector(dir, player.curSpeed * dt);
     player.moving = true;
@@ -1275,10 +1359,10 @@ function shoot(u, tg) {
   const n = u.type === 'lich' ? (u.hp / u.maxHp < 0.5 ? 5 : 3) : 1;
   for (let i = 0; i < n; i++) {
     const dir = base.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), (i - (n - 1) / 2) * 0.22);
-    const color = u.team === 'enemy' ? (u.type === 'lich' ? 0x00ffcc : 0xff5a1f) : 0xb46cff;
+    const color = u.team === 'enemy' ? ({ lich: 0x00ffcc, warden: 0x7dd3fc }[u.type] ?? 0xff5a1f) : 0xb46cff;
     const m = new THREE.Mesh(new THREE.SphereGeometry(u.type === 'lich' ? 0.35 : 0.22, 10, 10), new THREE.MeshBasicMaterial({ color }));
     m.position.copy(start); scene.add(m);
-    projectiles.push({ m, v: dir.multiplyScalar(u.type === 'lich' ? 18 : 16), team: u.team, dmg: unitDmg(u) * (0.9 + Math.random() * 0.2), life: 2, src: u, r: 0.35 });
+    projectiles.push({ m, v: dir.multiplyScalar(u.type === 'lich' ? 18 : 16), team: u.team, dmg: unitDmg(u) * (0.9 + Math.random() * 0.2), life: 2, src: u, r: 0.35, slow: u.type === 'warden' ? 0.8 : 0 });
   }
   sfx('orb');
 }
@@ -1381,13 +1465,135 @@ function bossAI(u, tg, d, dt) {
       burstFX(u.pos.clone().setY(1.5), 0x00ffcc, 16, 6);
       return true;
     }
+  } else if (T.guardian) {
+    return guardianAI(u, tg, d, dt);
   }
   return false;
+}
+
+const say = (u, text, color) => { if (u.team === 'enemy') floatText(u.pos.clone().setY(TYPES[u.type].h + 0.4), text, color, 20); };
+const scatter = (p, r) => p.clone().add(new THREE.Vector3((Math.random() - 0.5) * 2 * r, 0, (Math.random() - 0.5) * 2 * r));
+
+// Unique abilities for the four Rift Guardians. Returns true when the guardian used its turn.
+function guardianAI(u, tg, d, dt) {
+  const ai = u.ai, enemy = u.team === 'enemy', frac = u.hp / u.maxHp, T = TYPES[u.type];
+  const tick = (k, start) => { ai[k] = (ai[k] ?? start) - dt; return ai[k] <= 0; };
+  const foes = (enemy ? foesOfEnemy : enemiesAlive).filter(isAlive);
+
+  if (u.type === 'warchief') {
+    // Calls in goblin reinforcements, enrages nearby allies, and lobs fire bombs that leave burning ground.
+    if (enemy) for (const th of [0.7, 0.4]) if (frac < th && !ai['sum' + th]) {
+      ai['sum' + th] = true; summonMinions(u, ['goblin', 'goblin', 'goblin', 'goblin', th < 0.5 ? 'orc' : 'goblin']);
+      bigText('TO ARMS!', 'The Warchief calls his horde'); sfx('roar');
+    }
+    if (enemy && frac < 0.3 && ai.phase < 2) { ai.phase = 2; u.rageT = 1e9; bigText('BLOODLUST', 'The Warchief is permanently enraged'); sfx('roar'); shake(0.5); }
+    if (!tg) return false;
+    if (tick('cryT', 5)) { ai.cryT = 12; warCry(u); u.windup = { t: 0.6, fn: () => { u.attackT = 1; } }; return true; }
+    if (tick('bombT', 3) && d < 22) {
+      ai.bombT = ai.phase >= 2 ? 4 : 6.5;
+      const spots = [scatter(tg.pos, 1), ...foes.sort(() => Math.random() - 0.5).slice(0, 2).map(o => scatter(o.pos, 1.5)), scatter(tg.pos, 4)];
+      for (const p of spots) telegraph({ pos: p, r: 2.4, t: 1.3, team: u.team, dmg: unitDmg(u) * 1.5, src: u, kb: 6, shake: 0.15, pool: { r: 2.2, life: 4, dps: unitDmg(u) * 0.5, color: 0xff6a1a } });
+      say(u, 'FIRE BOMBS', '#fdba74');
+      u.windup = { t: 0.5, fn: () => { u.attackT = 1; } };
+      return true;
+    }
+  } else if (u.type === 'warden') {
+    // Freezing nova and ice lances slow you; below half HP it hardens its armor inside a blizzard.
+    if (u.armorBoostT <= 0 && u.auras?.ice) setAura(u, 'ice', null);
+    if (!tg) return false;
+    if (tick('novaT', 4) && d < 8) {
+      ai.novaT = 9;
+      telegraph({ pos: u.pos.clone(), r: 7, t: 1.2, team: u.team, dmg: unitDmg(u) * 1.4, src: u, kb: 8, slow: 3, shake: 0.4 });
+      say(u, 'FROST NOVA', '#7dd3fc');
+      u.windup = { t: 1.2, fn: () => { u.attackT = 1; } };
+      return true;
+    }
+    if (tick('lanceT', 6) && d < 24) {
+      ai.lanceT = frac < 0.5 ? 5 : 7;
+      const base = tg.pos.clone().sub(u.pos).setY(0).normalize();
+      const n = frac < 0.5 ? 5 : 3;
+      for (let k = 0; k < n; k++) {
+        const dir = base.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), (k - (n - 1) / 2) * 0.3);
+        telegraph({ pos: u.pos.clone(), rect: { dir, len: 22, width: 1.8 }, t: 1.0, team: u.team, dmg: unitDmg(u) * 1.6, src: u, slow: 2 });
+      }
+      say(u, 'ICE LANCES', '#bae6fd');
+      u.windup = { t: 1.0, fn: () => { u.attackT = 1; } };
+      return true;
+    }
+    if (enemy && frac < 0.5 && tick('bulT', 0)) {
+      ai.bulT = 16; u.armorBoostT = 6;
+      setAura(u, 'ice', 0x7dd3fc, T.radius + 1.2);
+      hazard({ pos: u.pos.clone(), r: 6.5, life: 6, dps: unitDmg(u) * 0.6, team: u.team, src: u, color: 0x7dd3fc, slow: true });
+      bigText('FROZEN BULWARK', 'Its armor hardens — leave the blizzard');
+      return true;
+    }
+  } else if (u.type === 'duelist') {
+    // Chains lightning-fast dash strikes, takes a parry stance that punishes melee, and splits into mirror images.
+    if (u.parryT > 0) { if (tg) faceToward(u, tg.pos, dt); return true; }
+    if (u.auras?.parry) setAura(u, 'parry', null);
+    if (enemy) for (const th of [0.6, 0.3]) if (frac < th && !ai['img' + th]) {
+      ai['img' + th] = true;
+      for (const m of summonMinions(u, ['duelist', 'duelist'])) makeMirrorImage(m, u);
+      bigText('MIRROR IMAGES', 'Only one of them is real'); sfx('roar');
+    }
+    if (!tg) return false;
+    if (ai.comboLeft > 0) {
+      ai.comboLeft--;
+      const dir = tg.pos.clone().sub(u.pos).setY(0).normalize();
+      u.root.rotation.y = Math.atan2(dir.x, dir.z);
+      telegraph({ pos: u.pos.clone(), rect: { dir, len: 12, width: 2.2 }, t: 0.5, team: u.team, dmg: 0 });
+      u.windup = { t: 0.5, fn: () => startCharge(u, dir, 12, 32, unitDmg(u) * 1.3) };
+      return true;
+    }
+    if (tick('parryCd', 6) && d < 7) {
+      ai.parryCd = frac < 0.5 ? 7 : 10; u.parryT = 2.5;
+      setAura(u, 'parry', 0xfbbf24, T.radius + 0.9);
+      say(u, 'PARRY STANCE', '#fde68a');
+      if (enemy) notify('The Duelist is parrying — <b>back off or use ranged attacks</b> (Dagger Tempest).', 'gold');
+      return true;
+    }
+    if (tick('dashT', 3) && d < 18) { ai.dashT = frac < 0.5 ? 5 : 7; ai.comboLeft = frac < 0.5 ? 3 : 2; say(u, 'BLADE RUSH', '#fda4af'); return true; }
+  } else if (u.type === 'broodmother') {
+    // Hatches broodlings, spits venom that leaves poison pools, and burrows to erupt beneath you.
+    if (enemy && tick('hatchT', 8)) { ai.hatchT = 14; summonMinions(u, frac < 0.5 ? ['wolf', 'wolf', 'wolf', 'wolf'] : ['wolf', 'wolf', 'wolf']); say(u, 'HATCH', '#bef264'); sfx('roar'); return true; }
+    if (!tg) return false;
+    if (tick('spitT', 3) && d < 20) {
+      ai.spitT = 5;
+      for (const p of [scatter(tg.pos, 0.5), scatter(tg.pos, 3), scatter(tg.pos, 3)])
+        telegraph({ pos: p, r: 2.6, t: 1.1, team: u.team, dmg: unitDmg(u) * 1.2, src: u, pool: { r: 2.6, life: 6, dps: unitDmg(u) * 0.6, color: 0x65a30d } });
+      say(u, 'VENOM SPIT', '#bef264');
+      u.windup = { t: 0.5, fn: () => { u.attackT = 1; } };
+      return true;
+    }
+    if (enemy && frac < 0.5 && tick('burrowT', 0)) {
+      ai.burrowT = 12;
+      u.burrowed = true; u.root.visible = false;
+      burstFX(u.pos.clone().setY(0.3), 0x65a30d, 20, 6);
+      const p = tg.pos.clone();
+      telegraph({ pos: p, r: 4.5, t: 1.8, team: u.team, dmg: unitDmg(u) * 2.2, src: u, kb: 12, shake: 0.6 });
+      say(u, 'BURROW', '#bef264');
+      u.windup = { t: 1.8, fn: () => { u.pos.set(p.x, 0, p.z); u.root.visible = true; u.burrowed = false; burstFX(u.pos.clone().setY(0.5), 0x65a30d, 24, 8); } };
+      return true;
+    }
+  }
+  return false;
+}
+
+function makeMirrorImage(m, real) {
+  m.clone = true; m.ai = null;
+  m.maxHp = m.hp = real.maxHp * 0.12;
+  m.bar.className = 'ubar'; m.bar.innerHTML = '<i></i><span>Mirror Image</span>'; m.barFill = m.bar.firstChild;
+  m.root.traverse(o => { if (o.isMesh) { o.material.transparent = true; o.material.opacity = 0.55; } });
 }
 
 function updateUnit(u, dt) {
   const T = TYPES[u.type];
   if (u.shieldMesh) u.shieldMesh.position.copy(u.pos).setY(T.h * 0.5);
+  for (const k in u.auras || {}) u.auras[k].position.copy(u.pos).setY(T.h * 0.5);
+  if (u.rageT > 0) u.rageT -= dt;
+  if (u.slowT > 0) u.slowT -= dt;
+  if (u.armorBoostT > 0) u.armorBoostT -= dt;
+  if (u.parryT > 0) u.parryT -= dt;
   if (u.rising > 0) {
     u.rising -= dt;
     u.pos.y = -T.h * Math.max(0, u.rising);
@@ -1504,6 +1710,7 @@ function updateProjectiles(dt) {
       if (!isAlive(o) || p.hit?.has(o)) continue;
       if (dist2D(o.pos, p.m.position) < o.radius + p.r && p.m.position.y < 3.5 + (o.isPlayer ? 0 : TYPES[o.type].h * 0.5)) {
         dealDamage(o, p.dmg, p.src, p.pierce ? { noBlock: false } : {});
+        if (p.slow) applySlow(o, p.slow);
         burstFX(p.m.position.clone(), p.team === 'enemy' ? 0xff5a1f : 0xb46cff, 5, 3);
         if (p.pierce) p.hit.add(o); else { p.life = 0; break; }
       }
@@ -1532,14 +1739,17 @@ function updateCorpses(dt) {
 // ================================================================ rifts
 const rankOf = n => n <= 2 ? 'E' : n <= 4 ? 'D' : n <= 7 ? 'C' : n <= 10 ? 'B' : n <= 14 ? 'A' : 'S';
 const BOSS_ORDER = ['colossus', 'alpha', 'lich'];
+const GUARDIAN_ORDER = ['warchief', 'broodmother', 'duelist', 'warden'];
+let bossQueue = [], bossT = 0;
+// Each rift is a wave of regular enemies followed by a boss fight at the end.
+// Every 5th rift ends with a major boss; every other rift ends with a Rift Guardian.
 function riftPlan(n) {
   const p = [], add = (t, c) => { for (let i = 0; i < c; i++) p.push(t); };
   if (n % 5 === 0) {
     add('knight', 1 + Math.floor(n / 10)); add('warlock', 1 + Math.floor(n / 15)); add('orc', 1);
-    const cyc = n / 5;
-    p.push(BOSS_ORDER[(cyc - 1) % 3]);
-    if (cyc >= 4) p.push(BOSS_ORDER[cyc % 3]);
-    return p;
+    const cyc = n / 5, bosses = [BOSS_ORDER[(cyc - 1) % 3]];
+    if (cyc >= 4) bosses.push(BOSS_ORDER[cyc % 3]);
+    return { wave: p, bosses };
   }
   if (n === 1) add('goblin', 6);
   else if (n === 2) { add('goblin', 5); add('wolf', 3); }
@@ -1550,43 +1760,69 @@ function riftPlan(n) {
     add('knight', Math.floor(n / 4));
     for (let i = 0; i < 8 + Math.floor(n * 1.5); i++) p.push(pool[Math.floor(Math.random() * pool.length)]);
   }
-  return p;
+  const g = n - 1 - Math.floor(n / 5);
+  const bosses = [GUARDIAN_ORDER[g % 4]];
+  if (n >= 16) bosses.push(GUARDIAN_ORDER[(g + 2) % 4]);
+  return { wave: p, bosses };
 }
 function startRift(n) {
-  rift = n; spawnQueue = riftPlan(n); spawnT = 1.2; riftState = 'fighting';
+  rift = n;
+  const plan = riftPlan(n);
+  spawnQueue = plan.wave; bossQueue = plan.bosses;
+  spawnT = 1.2; riftState = 'fighting';
   bigText(`RIFT ${n}`, n % 5 === 0 ? 'A BOSS GATE HAS OPENED' : `${rankOf(n)}-RANK GATE HAS OPENED`);
+}
+function spawnFromPortal(type, portal) {
+  const T = TYPES[type];
+  const toCenter = portal.pos.clone().negate().setY(0).normalize();
+  const pos = portal.pos.clone().addScaledVector(toCenter, 3 + T.radius).add(new THREE.Vector3((Math.random() - 0.5) * 5, 0, (Math.random() - 0.5) * 5));
+  const elite = !T.boss && rift >= 2 && Math.random() < 0.15 + rift * 0.015;
+  spawnUnit(type, 'enemy', pos, { elite });
+  burstFX(pos.clone().setY(1), T.boss ? 0xef4444 : 0x3b82f6, T.boss ? 30 : 8, T.boss ? 8 : 4);
+  if (T.boss) {
+    bigText(T.name.toUpperCase(), T.guardian ? 'RIFT GUARDIAN' : 'S-RANK BOSS');
+    sfx('roar'); shake(0.6);
+    pillarFX(pos, 0xef4444, 14, 1.4, T.radius + 1);
+  }
 }
 function updateRift(dt) {
   const activePortals = portals.slice(0, rift >= 6 ? 3 : rift >= 3 ? 2 : 1);
   portals.forEach((p, i) => {
-    const on = activePortals.includes(p) && riftState === 'fighting';
+    const on = (activePortals.includes(p) && riftState === 'fighting') || (i === 0 && riftState === 'boss');
     p.disc.material.opacity += ((on ? 0.6 : 0.08) - p.disc.material.opacity) * dt * 3;
     p.light.intensity = on ? 30 + Math.sin(time * 4 + i) * 8 : 4;
-    p.disc.rotation.z += dt * 2;
+    p.light.color.set(riftState === 'boss' ? 0xef4444 : 0x3b82f6);
+    p.disc.rotation.z += dt * (riftState === 'boss' ? 5 : 2);
   });
   if (riftState === 'fighting') {
     spawnT -= dt;
     if (spawnT <= 0 && spawnQueue.length) {
-      const type = spawnQueue.shift(), T = TYPES[type];
-      const portal = T.boss ? portals[0] : activePortals[Math.floor(Math.random() * activePortals.length)];
-      const toCenter = portal.pos.clone().negate().setY(0).normalize();
-      const pos = portal.pos.clone().addScaledVector(toCenter, 3 + T.radius).add(new THREE.Vector3((Math.random() - 0.5) * 5, 0, (Math.random() - 0.5) * 5));
-      const elite = !T.boss && rift >= 2 && Math.random() < 0.15 + rift * 0.015;
-      spawnUnit(type, 'enemy', pos, { elite });
-      burstFX(pos.clone().setY(1), 0x3b82f6, 8, 4);
-      if (T.boss) { bigText(T.name.toUpperCase(), 'S-RANK BOSS'); sfx('roar'); shake(0.6); }
-      spawnT = T.boss ? 3 : 0.7;
+      spawnFromPortal(spawnQueue.shift(), activePortals[Math.floor(Math.random() * activePortals.length)]);
+      spawnT = 0.7;
     }
     if (!spawnQueue.length && !enemiesAlive.length) {
-      riftState = 'cleared'; interT = 14;
-      bigText('RIFT CLEARED', 'RAISE YOUR FALLEN FOES BEFORE THEY FADE');
+      if (bossQueue.length) {
+        riftState = 'boss'; bossT = 4;
+        const T = TYPES[bossQueue[0]];
+        bigText(T.guardian ? 'THE GUARDIAN AWAKENS' : 'THE GATE TREMBLES', 'Defeat the boss to clear the rift');
+        notify(`<b style="color:#fca5a5">${bossQueue.map(b => TYPES[b].name).join(' and ')}</b> ${bossQueue.length > 1 ? 'are' : 'is'} coming through the rift.`, 'red');
+        sfx('roar'); shake(0.4);
+      } else endRift();
     }
+  } else if (riftState === 'boss') {
+    bossT -= dt;
+    if (bossT <= 0 && bossQueue.length) { spawnFromPortal(bossQueue.shift(), portals[0]); bossT = 4; }
+    // Check live units: enemiesAlive was built at the start of the frame, before the boss spawned.
+    if (!bossQueue.length && !units.some(u => u.alive && u.team === 'enemy')) endRift();
   } else if (riftState === 'cleared' || riftState === 'start') {
     interT -= dt;
     if (interT <= 0) startRift(rift + 1);
   }
 }
-
+function endRift() {
+  riftState = 'cleared'; interT = 14;
+  bigText('RIFT CLEARED', 'RAISE YOUR FALLEN FOES BEFORE THEY FADE');
+}
 // ================================================================ voice
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let rec = null, voiceOn = false, lastVoice = 0;
@@ -1772,17 +2008,19 @@ function setupPlayerRig() {
   player.root.add(player.rig.root);
 }
 function clearField() {
-  for (const u of units) { u.bar.remove(); u.rig.dispose?.(); disposeObj(u.root); if (u.shieldMesh) disposeObj(u.shieldMesh); }
+  for (const u of units) { u.bar.remove(); u.rig.dispose?.(); disposeObj(u.root); if (u.shieldMesh) disposeObj(u.shieldMesh); clearAuras(u); }
   for (const c of corpses) { disposeObj(c.marker); c.rig.dispose?.(); disposeObj(c.root); }
   for (const p of projectiles) disposeObj(p.m);
   for (const t of telegraphs) disposeObj(t.g);
+  for (const h of hazards) disposeObj(h.m);
+  hazards = []; bossQueue = [];
   units = []; corpses = []; projectiles = []; timers = []; telegraphs = [];
   for (const a of army) if (a.status === 'active') a.status = 'stored';
 }
 function beginRun() {
   clearField();
   recalcStats();
-  player.alive = true; player.hp = player.maxHp; player.mp = player.maxMp; player.kb = null;
+  player.alive = true; player.hp = player.maxHp; player.mp = player.maxMp; player.kb = null; player.slowT = 0;
   player.pos.set(0, 0, 0); player.rig.body.rotation.set(0, 0, 0);
   for (const k in cds) cds[k] = 0;
   buffT = 0;
@@ -1855,9 +2093,10 @@ function updateHUD() {
   $('activec').textContent = activeShadows().length;
   $('limit').textContent = armyLimit();
   $('recc').textContent = army.filter(a => a.status === 'recovering').length;
-  $('buff').textContent = buffT > 0 ? `✦ Night Sovereignty — ${Math.ceil(buffT)}s` : '';
+  $('buff').textContent = [buffT > 0 ? `✦ Night Sovereignty — ${Math.ceil(buffT)}s` : '', player.slowT > 0 ? '❄ Slowed' : ''].filter(Boolean).join(' · ');
   $('riftName').textContent = rift ? `RIFT ${rift} · ${rift % 5 === 0 ? 'BOSS GATE' : rankOf(rift) + '-RANK'}` : 'PREPARING';
-  $('riftInfo').textContent = riftState === 'fighting' ? `Enemies remaining: ${spawnQueue.length + enemiesAlive.length}`
+  $('riftInfo').textContent = riftState === 'boss' ? (bossQueue.length ? `Boss arriving: ${TYPES[bossQueue[0]].name}` : `Defeat the boss · ${enemiesAlive.length} enemies`)
+    : riftState === 'fighting' ? `Enemies remaining: ${spawnQueue.length + enemiesAlive.length} · then the boss`
     : riftState === 'cleared' ? `Next rift opens in ${Math.ceil(interT)}s` : `First rift opens in ${Math.ceil(Math.max(0, interT))}s`;
   for (const [id, a] of Object.entries(AB)) {
     const c = $('c-' + id);
@@ -1866,7 +2105,7 @@ function updateHUD() {
     const t = $('tb-' + id);
     if (t) { t.querySelector('.cd').style.height = Math.max(0, cds[id] / a.cd * 100) + '%'; t.classList.toggle('nomp', player.mp < a.mp); }
   }
-  const boss = enemiesAlive.find(u => TYPES[u.type].boss);
+  const boss = enemiesAlive.find(u => TYPES[u.type].boss && !u.clone);
   $('bossbar').classList.toggle('hidden', !boss);
   if (boss) {
     const T = TYPES[boss.type];
@@ -1897,6 +2136,7 @@ function updateWorld(dt) {
   guard('corpses', () => updateCorpses(dt));
   guard('projectiles', () => updateProjectiles(dt));
   guard('telegraphs', () => updateTelegraphs(dt));
+  guard('hazards', () => updateHazards(dt));
   guard('timers', () => {
     const due = timers.filter(t => (t.t -= dt) <= 0);
     timers = timers.filter(t => t.t > 0);
@@ -1906,7 +2146,7 @@ function updateWorld(dt) {
     a.status = 'stored';
     notify(`<b>${a.name}</b> has reformed — press <b>Q</b> to deploy (${DEPLOY_COST[TYPES[a.type].rank]} MP).`);
   }
-  if (riftState !== 'fighting') for (const u of units) if (u.alive && u.team === 'shadow') u.hp = Math.min(u.maxHp, u.hp + u.maxHp * 0.08 * dt);
+  if (riftState === 'cleared' || riftState === 'start') for (const u of units) if (u.alive && u.team === 'shadow') u.hp = Math.min(u.maxHp, u.hp + u.maxHp * 0.08 * dt);
   units = units.filter(u => u.alive);
 }
 function loop() {
@@ -1975,6 +2215,8 @@ function prewarmShaders() {
   camera.position.set(0, 4, 8); camera.lookAt(0, 1, -6);
   renderer.render(scene, camera);
   for (const r of tmp) { r.dispose?.(); disposeObj(r.root); }
+  for (const t of telegraphs) disposeObj(t.g);
+  telegraphs = [];
 }
 boot();
 </script>
