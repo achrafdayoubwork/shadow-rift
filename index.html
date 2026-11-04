@@ -671,9 +671,12 @@ function pillarFX(pos, color, h = 9, life = 1.2, r = 1) {
   m.position.set(pos.x, h / 2, pos.z);
   addFX(m, life, (e, k) => { m.material.opacity = 0.7 * (1 - k); m.scale.set(1 - k * 0.7, 1 + k * 0.3, 1 - k * 0.7); });
 }
+const PARTICLE_GEO = new THREE.BoxGeometry(0.12, 0.12, 0.12);
 function burstFX(pos, color, n = 12, speed = 6) {
+  n = Math.min(n, Math.max(2, 400 - effects.length)); // cap live particles so big fights don't bog down
   for (let i = 0; i < n; i++) {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.12), fxMat(color));
+    const m = new THREE.Mesh(PARTICLE_GEO, fxMat(color));
+    m.userData.sharedGeo = true;
     m.position.copy(pos);
     const v = new THREE.Vector3((Math.random() - 0.5) * speed, Math.random() * speed, (Math.random() - 0.5) * speed);
     addFX(m, 0.6 + Math.random() * 0.3, (e, k) => { v.y -= 0.25; m.position.addScaledVector(v, 1 / 60); m.material.opacity = 1 - k; });
@@ -782,7 +785,8 @@ function spawnUnit(type, team, pos, extra = {}) {
   if (T.boss) u.ai = { slamT: 6, chargeT: 4, meteorT: 6, blinkT: 0, phase: 1 };
   if (extra.elite && rig.model) rig.root.traverse(o => { if (o.isMesh && !o.userData.weapon) { o.material.emissive = new THREE.Color(0x6a4200); o.material.emissiveIntensity = 0.6; } });
   const bar = document.createElement('div');
-  if (T.boss && team === 'enemy') { bar.className = 'ubar hidden'; }
+  // Enemy bosses use the big bar at the top of the screen, so their overhead bar stays hidden.
+  if (T.boss && team === 'enemy') { bar.className = 'ubar hidden'; bar.innerHTML = '<i></i>'; }
   else {
     bar.className = 'ubar' + (team === 'shadow' ? ' sh' : '') + (extra.elite ? ' elite' : '');
     const label = team === 'shadow' ? u.name : `${extra.elite ? 'Elite ' : ''}Lv ${u.lvl}`;
@@ -1668,43 +1672,57 @@ function updateHUD() {
   if (!$('army').classList.contains('hidden')) renderArmyPanel();
 }
 
+// Run one step of the frame; an error is logged once instead of stopping the rest of the frame (which froze the screen).
+const loggedErrors = new Set();
+function guard(name, fn) {
+  try { fn(); } catch (e) {
+    if (!loggedErrors.has(name)) { loggedErrors.add(name); console.error(`[${name}]`, e); }
+  }
+}
+function updateWorld(dt) {
+  enemiesAlive = units.filter(u => u.alive && u.team === 'enemy');
+  foesOfEnemy = [player, ...units.filter(u => u.alive && u.team === 'shadow')];
+  buffT -= dt;
+  guard('player', () => updatePlayer(dt));
+  guard('rift', () => updateRift(dt));
+  for (const u of units) if (u.alive) guard('unit:' + u.type, () => updateUnit(u, dt));
+  guard('separate', separate);
+  guard('corpses', () => updateCorpses(dt));
+  guard('projectiles', () => updateProjectiles(dt));
+  guard('telegraphs', () => updateTelegraphs(dt));
+  guard('timers', () => {
+    const due = timers.filter(t => (t.t -= dt) <= 0);
+    timers = timers.filter(t => t.t > 0);
+    for (const t of due) guard('timer', t.fn);
+  });
+  for (const a of army) if (a.status === 'recovering' && (a.recover -= dt) <= 0) {
+    a.status = 'stored';
+    notify(`<b>${a.name}</b> has reformed — press <b>Q</b> to deploy (${DEPLOY_COST[TYPES[a.type].rank]} MP).`);
+  }
+  if (riftState !== 'fighting') for (const u of units) if (u.alive && u.team === 'shadow') u.hp = Math.min(u.maxHp, u.hp + u.maxHp * 0.08 * dt);
+  units = units.filter(u => u.alive);
+}
 function loop() {
   requestAnimationFrame(loop);
   const realDt = Math.min(clock.getDelta(), 0.05);
   const dt = playing && !paused ? realDt : 0;
   time += dt;
-  if (dt > 0) {
-    enemiesAlive = units.filter(u => u.alive && u.team === 'enemy');
-    foesOfEnemy = [player, ...units.filter(u => u.alive && u.team === 'shadow')];
-    buffT -= dt;
-    updatePlayer(dt);
-    updateRift(dt);
-    for (const u of units) if (u.alive) updateUnit(u, dt);
-    separate();
-    updateCorpses(dt);
-    updateProjectiles(dt);
-    updateTelegraphs(dt);
-    timers = timers.filter(t => { t.t -= dt; if (t.t <= 0) { t.fn(); return false; } return true; });
-    for (const a of army) if (a.status === 'recovering' && (a.recover -= dt) <= 0) {
-      a.status = 'stored';
-      notify(`<b>${a.name}</b> has reformed — press <b>Q</b> to deploy (${DEPLOY_COST[TYPES[a.type].rank]} MP).`);
-    }
-    if (riftState !== 'fighting') for (const u of units) if (u.alive && u.team === 'shadow') u.hp = Math.min(u.maxHp, u.hp + u.maxHp * 0.08 * dt);
-    units = units.filter(u => u.alive);
-  }
-  effects = effects.filter(e => {
-    e.life -= realDt;
-    e.update?.(e, Math.min(1, 1 - e.life / e.max));
-    if (e.life <= 0) { disposeObj(e.obj); return false; }
-    return true;
+  if (dt > 0) updateWorld(dt);
+  guard('effects', () => {
+    effects = effects.filter(e => {
+      e.life -= realDt;
+      e.update?.(e, Math.min(1, 1 - e.life / e.max));
+      if (e.life <= 0) { disposeObj(e.obj); return false; }
+      return true;
+    });
   });
   const pos = moteGeo.attributes.position;
   for (let i = 0; i < MOTES; i++) { let y = pos.getY(i) + realDt * 0.5; if (y > 22) y = 0; pos.setY(i, y); }
   pos.needsUpdate = true;
   if (!playing) yaw += realDt * 0.08;
-  updateCamera(realDt);
-  updateLabels(realDt);
-  if (playing && (hudT -= realDt) <= 0) { hudT = 0.1; updateHUD(); }
+  guard('camera', () => updateCamera(realDt));
+  guard('labels', () => updateLabels(realDt));
+  if (playing && (hudT -= realDt) <= 0) { hudT = 0.1; guard('hud', updateHUD); }
   renderer.render(scene, camera);
 }
 
@@ -1729,7 +1747,26 @@ async function boot() {
     $('loadInfo').textContent = 'Could not load character models (offline?) — using simple models.';
   }
   setupPlayerRig();
+  guard('prewarm', prewarmShaders);
   $('startBtn').disabled = false; $('startBtn').textContent = 'ENTER THE RIFT';
+}
+// Render every character (enemy and shadow versions, plus an elite) once behind the start screen,
+// so shaders compile now instead of causing a hitch the first time each enemy appears mid-fight.
+function prewarmShaders() {
+  const tmp = [];
+  let x = -10;
+  for (const key of Object.keys(TYPES)) for (const sh of [false, true]) {
+    const r = buildRig(key, sh);
+    r.root.position.set(x += 2, 0, -6);
+    if (!sh && r.model) r.root.traverse(o => { if (o.isMesh && !o.userData.weapon) { o.material.emissive = new THREE.Color(0x6a4200); o.material.emissiveIntensity = 0.6; } });
+    scene.add(r.root); r.update({ moving: true, speed: 3, curSpeed: 3, attackT: 0.5, stun: 0 }, 0.016); tmp.push(r);
+  }
+  telegraph({ pos: new THREE.Vector3(0, 0, -6), r: 3, t: 0.01, team: 'enemy', dmg: 0 });
+  burstFX(new THREE.Vector3(0, 1, -6), 0x8b5cf6, 2);
+  beamFX(new THREE.Vector3(0, 1, -6), new THREE.Vector3(2, 1, -6), 0xef4444);
+  camera.position.set(0, 4, 8); camera.lookAt(0, 1, -6);
+  renderer.render(scene, camera);
+  for (const r of tmp) { r.dispose?.(); disposeObj(r.root); }
 }
 boot();
 </script>
