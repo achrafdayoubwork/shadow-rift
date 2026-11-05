@@ -7,6 +7,13 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 ## How it plays
 
 - **Every kill gives you a level.** Your HP, mana, strength and army size grow as you fight.
+- **Dodge.** Press **Space** (or the Dodge button on a phone) to roll. It covers less ground than a dash but keeps you invulnerable longer. Rolling through an attack is a **Perfect Dodge** and gives +50% damage for 2 seconds.
+- **Three lives per run.** When you fall:
+  - You lose levels: everything gained in that rift, plus 10% (at least 2).
+  - Every shadow you raised during that rift is lost. You keep the army you had when the rift opened.
+  - You revive with full HP but **0 MP**, and all your shadows wait in reserve until you deploy them.
+  - The same rift then restarts after 8 seconds.
+  - On the third death the run ends. Your lives are shown as hearts next to your level.
 - **Recover between fights.** If you take no damage for 7 seconds, you heal quickly (6% of max HP per second). The next hit you take stops the healing.
 - **Arise.** Press **R**, or turn on voice with **V** and say "Arise!", to raise nearby fallen enemies as shadow soldiers. Each body fades after a short time, and raising it can fail.
 - **Build an army.** Your shadows are saved between sessions. When a shadow falls, it has to reform over time and then costs mana to deploy again (14 MP for the weakest up to 140 MP for an S-rank).
@@ -38,6 +45,7 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 | Left click | Dagger combo |
 | Q / G | Deploy / recall shadows |
 | Shift | Dash (invulnerable while dashing) |
+| Space | Dodge roll (Perfect Dodge: +50% damage for 2 s) |
 | E | Shadow Rend: area blast |
 | F | Umbral Step: teleport behind an enemy and backstab |
 | 1 | Dagger Tempest: piercing dagger fan |
@@ -54,7 +62,7 @@ Open the same link on your phone and turn it sideways. On-screen touch controls 
 - **Left side:** drag to move (joystick)
 - **Right side:** drag to look around; pinch to zoom
 - **⚔ button:** hold to attack. Attacks aim at the nearest enemy automatically.
-- **Button ring:** **Deploy** (right next to ⚔), Dash, Shadow Rend, Umbral Step, Daggers, Sovereign and **ARISE**
+- **Button ring:** **Deploy** (right next to ⚔), Dash, Dodge, Shadow Rend, Umbral Step, Daggers, Sovereign and **ARISE**
 - **Top row:** Recall, Army roster, Voice ("Arise!") and Pause
 
 The game pauses while the phone is held upright. Graphics quality is lowered slightly on phones so the game runs more smoothly.
