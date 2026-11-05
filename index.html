@@ -162,7 +162,7 @@
     <div class="lvl">LEVEL <b id="lvl">1</b></div>
     <div class="row"><span class="lbl">HP</span><div class="bar"><div id="hpf"></div></div><span class="val" id="hpt"></span></div>
     <div class="row"><span class="lbl">MP</span><div class="bar"><div id="mpf"></div></div><span class="val" id="mpt"></span></div>
-    <div class="stats">STR <b id="str"></b> · Shadows <b id="armyc">0</b> · Deployed <b id="activec">0</b>/<b id="limit">0</b> · Reforming <b id="recc">0</b></div>
+    <div class="stats">STR <b id="str"></b> · Shadows <b id="armyc">0</b> · Deployed <b id="activec">0</b>/<b id="limit">0</b> + boss <b id="bossc">0</b>/1 · Reforming <b id="recc">0</b></div>
     <div id="buff"></div>
   </div>
   <div id="rift" class="panel"><div id="riftName"></div><div id="riftInfo"></div></div>
@@ -181,7 +181,6 @@
   <div id="stickHome"></div>
   <div id="stick"><div id="knob"></div></div>
   <div id="tutil">
-    <button class="tu" data-act="deploy">Deploy</button>
     <button class="tu" data-act="recall">Recall</button>
     <button class="tu" data-act="army">Army</button>
     <button class="tu" id="tu-voice" data-act="voice">🎙 Voice</button>
@@ -200,8 +199,8 @@
       <b>Left side</b><span>Drag to move</span>
       <b>Right side</b><span>Drag to look around</span>
       <b>⚔</b><span>Hold to attack — auto-aims at the nearest enemy</span>
-      <b>Ring</b><span>Dash, Shadow Rend, Umbral Step, Gravebind, Daggers, Sovereign, Siphon, ARISE</span>
-      <b>Top</b><span>Deploy / recall shadows, army roster, voice ("Arise!"), pause</span>
+      <b>Ring</b><span>Deploy (next to ⚔), Dash, Shadow Rend, Umbral Step, Daggers, Sovereign, ARISE</span>
+      <b>Top</b><span>Recall shadows, army roster, voice ("Arise!"), pause</span>
     </div>
     <div class="ctrl deskOnly">
       <b>W A S D</b><span>Move · Mouse: look (click to lock) · Wheel: zoom</span>
@@ -209,12 +208,10 @@
       <b>SHIFT</b><span>Dash — invulnerable, use it to escape red danger zones</span>
       <b>E</b><span>Shadow Rend — area blast around you</span>
       <b>F</b><span>Umbral Step — teleport behind an enemy and backstab (ignores blocks)</span>
-      <b>1</b><span>Gravebind — pull enemies together and stun them</span>
-      <b>2</b><span>Dagger Tempest — throw a fan of piercing shadow daggers</span>
-      <b>3</b><span>Night Sovereignty — empower and heal your whole army</span>
-      <b>4</b><span>Soul Siphon — drain life from nearby enemies</span>
-      <b>R</b><span>ARISE — raise fallen enemies as shadow soldiers</span>
       <b>Q / G</b><span>Deploy shadows (costs mana) / Recall shadows</span>
+      <b>1</b><span>Dagger Tempest — throw a fan of piercing shadow daggers</span>
+      <b>2</b><span>Night Sovereignty — empower and heal your whole army</span>
+      <b>R</b><span>ARISE — raise fallen enemies as shadow soldiers</span>
       <b>V</b><span>Voice — say "Arise!", "Come out!" or "Return!"</span>
       <b>TAB</b><span>Shadow army roster</span>
     </div>
@@ -613,7 +610,7 @@ const TYPES = {
   broodmother: { name: 'Brood Mother',    rank: 'A', hp: 4400, dmg: 20, speed: 3.8, range: 1.8, cd: 1.3, radius: 1.5, h: 3.0, armor: 0.33, boss: true, guardian: true },
 };
 const RANK_IDX = { E: 0, D: 1, C: 2, B: 3, A: 4, S: 5 };
-const DEPLOY_COST = { E: 8, D: 12, C: 20, B: 30, A: 50, S: 80 };
+const DEPLOY_COST = { E: 14, D: 22, C: 35, B: 55, A: 90, S: 140 };
 const RECOVER_TIME = { E: 20, D: 30, C: 40, B: 55, A: 100, S: 150 };
 const SHADOW_NAMES = ['Grim', 'Vex', 'Ashen', 'Morrow', 'Fang', 'Tusk', 'Rook', 'Wraith', 'Cinder', 'Hollow', 'Onyx', 'Dusk', 'Raze', 'Thorn', 'Gloom', 'Nox', 'Mire', 'Sable', 'Husk', 'Vigil'];
 const SPECIAL_NAMES = { colossus: ['Behemoth', 'Monolith'], alpha: ['Crimson Maw', 'Nightfang'], lich: ['Hollow King', 'Pale Regent'], warchief: ['Gorrak', 'Ironjaw'], warden: ['Frostveil', 'Hoarfang'], duelist: ['Scarlet Edge', 'Vesper'], broodmother: ['Venomqueen', 'Mother Mire'], knight: ['Sir Vael', 'Oathbreaker', 'Grimguard', 'Black Aegis'] };
@@ -623,16 +620,14 @@ const AB = {
   dash:    { key: 'SHIFT', name: 'Dash',              cd: 1.1, mp: 0 },
   rend:    { key: 'E',     name: 'Shadow Rend',       cd: 6,   mp: 30 },
   step:    { key: 'F',     name: 'Umbral Step',       cd: 7,   mp: 20 },
-  bind:    { key: '1',     name: 'Gravebind',         cd: 14,  mp: 35 },
-  tempest: { key: '2',     name: 'Dagger Tempest',    cd: 8,   mp: 30 },
-  sov:     { key: '3',     name: 'Night Sovereignty', cd: 45,  mp: 50 },
-  siphon:  { key: '4',     name: 'Soul Siphon',       cd: 20,  mp: 40 },
+  tempest: { key: '1',     name: 'Dagger Tempest',    cd: 8,   mp: 30 },
+  sov:     { key: '2',     name: 'Night Sovereignty', cd: 45,  mp: 50 },
   arise:   { key: 'R',     name: 'Arise',             cd: 1.5, mp: 15 },
 };
 const cds = Object.fromEntries(Object.keys(AB).map(k => [k, 0]));
-$('skills').innerHTML = '<div class="chip panel"><b>LMB</b>Attack</div>'
+$('skills').innerHTML = '<div class="chip panel"><b>LMB</b>Attack</div><div class="chip panel"><b>Q</b>Deploy<em>MP by rank</em></div>'
   + Object.entries(AB).map(([id, a]) => `<div class="chip panel" id="c-${id}"><b>${a.key}</b>${a.name}${a.mp ? `<em>${a.mp} MP</em>` : ''}<div class="cd"></div></div>`).join('')
-  + '<div class="chip panel"><b>Q</b>Deploy<em>MP by rank</em></div><div class="chip panel"><b>G</b>Recall</div>'
+  + '<div class="chip panel"><b>G</b>Recall</div>'
   + '<div class="chip panel" id="c-voice"><b>V</b>Voice: off</div><div class="chip panel"><b>TAB</b>Army</div>';
 
 // ================================================================ audio
@@ -701,8 +696,10 @@ function recalcStats() {
   player.str = 12 + L * 0.6; player.speed = 7 + Math.min(2.5, L * 0.03);
   aura.intensity = 6 + Math.min(20, L * 0.2);
 }
-const MAX_DEPLOYED = 20; // hard cap on shadows on the field at once
+// On the field at once: up to 10 shadow soldiers (the limit grows with level) plus your one shadow boss.
+const MAX_DEPLOYED = 10;
 const armyLimit = () => Math.min(MAX_DEPLOYED, 3 + Math.floor(player.level / 3));
+const isBossEntry = a => TYPES[a.type].boss;
 const pDmg = () => player.str * (buffT > 0 ? 1.25 : 1);
 
 // ================================================================ save
@@ -715,6 +712,9 @@ function load() {
     if (!s) return;
     player.level = s.level || 1; armyIdSeq = s.seq || 0;
     army = (s.army || []).filter(a => TYPES[a.type]).map(a => ({ ...a, status: 'stored', recover: 0 }));
+    // Older saves could hold several boss shadows: keep only the most recent one.
+    const bosses = army.filter(a => TYPES[a.type].boss);
+    if (bosses.length > 1) army = army.filter(a => !TYPES[a.type].boss || a === bosses[bosses.length - 1]);
   } catch (e) { /* corrupt save: start fresh */ }
 }
 function showSaveInfo() {
@@ -1095,6 +1095,8 @@ function pickName(type) {
   return `${base} ${i}`;
 }
 const activeShadows = () => units.filter(u => u.alive && u.team === 'shadow');
+const activeSoldiers = () => activeShadows().filter(u => !TYPES[u.type].boss);
+const activeBoss = () => activeShadows().find(u => TYPES[u.type].boss);
 
 function arise() {
   if (!canAct() || cds.arise > 0) return;
@@ -1118,11 +1120,21 @@ function resolveExtraction(c) {
     : T.boss ? Math.min(0.5, 0.18 + player.level * 0.0015) : c.elite ? 0.6 : 0.85;
   if (Math.random() < chance) {
     removeCorpse(c);
+    // You can command only one shadow boss: a new one replaces the old.
+    if (T.boss) {
+      const old = army.find(isBossEntry);
+      if (old) {
+        army.splice(army.indexOf(old), 1);
+        const u = activeBoss();
+        if (u) { u.alive = false; u.bar.remove(); clearAuras(u); ringFX(u.pos, 0x6d28d9, 3, 0.6); sinkAway(u, 0.8); }
+        notify(`<b>${old.name}</b> fades into the void to make room for a new shadow boss.`, 'gold');
+      }
+    }
     const entry = { id: ++armyIdSeq, type: c.type, name: pickName(c.type), status: 'stored', recover: 0 };
     army.push(entry);
     if (T.boss) bigText(entry.name.toUpperCase(), `${T.name} now serves you`);
     notify(`<b>${T.name}</b> has risen as your shadow: <b style="color:#c084fc">${entry.name}</b>`);
-    if (activeShadows().length < armyLimit()) summonEntry(entry, c.pos);
+    if (T.boss || activeSoldiers().length < armyLimit()) summonEntry(entry, c.pos);
     else notify(`${entry.name} rests in the shadow realm (Q to deploy).`);
     save();
   } else {
@@ -1151,18 +1163,20 @@ function deployArmy(free = false) {
     notify(rec.length ? `${rec.length} fallen shadow${rec.length > 1 ? 's are' : ' is'} still reforming.` : army.length ? 'All your shadows are already deployed.' : 'You have no shadows yet. Defeat foes and say "Arise".');
     return;
   }
-  let slots = armyLimit() - activeShadows().length;
-  if (slots <= 0) { notify(armyLimit() >= MAX_DEPLOYED ? `Deployment limit reached: at most ${MAX_DEPLOYED} shadows can fight at once.` : `Deployment limit reached (${armyLimit()}). It grows with your level, up to ${MAX_DEPLOYED}.`); return; }
+  let slots = armyLimit() - activeSoldiers().length, bossSlot = activeBoss() ? 0 : 1;
+  const canPlace = e => isBossEntry(e) ? bossSlot > 0 : slots > 0;
+  if (!ready.some(canPlace)) { notify(armyLimit() >= MAX_DEPLOYED ? `Deployment limit reached: at most ${MAX_DEPLOYED} shadow soldiers and 1 shadow boss can fight at once.` : `Deployment limit reached (${armyLimit()} soldiers). It grows with your level, up to ${MAX_DEPLOYED}.`); return; }
   ready.sort((a, b) => RANK_IDX[TYPES[b.type].rank] - RANK_IDX[TYPES[a.type].rank]);
   let n = 0, spent = 0, blocked = null, i = activeShadows().length;
   for (const e of ready) {
-    if (slots <= 0) break;
+    if (!canPlace(e)) continue;
     const cost = free ? 0 : DEPLOY_COST[TYPES[e.type].rank];
     if (player.mp < cost) { blocked = blocked || { e, cost }; continue; }
     player.mp -= cost; spent += cost;
     const a = i * 2.39996, r = 3 + Math.sqrt(i) * 1.3;
     summonEntry(e, player.pos.clone().add(new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r)));
-    slots--; n++; i++;
+    if (isBossEntry(e)) bossSlot--; else slots--;
+    n++; i++;
   }
   if (n) { sfx('arise'); notify(`${n} shadow${n > 1 ? 's' : ''} answer your call${spent ? ` (−${spent} MP)` : ''}.`); }
   if (blocked) notify(`Not enough mana to deploy <b>${blocked.e.name}</b> (${blocked.cost} MP).`, 'red');
@@ -1279,27 +1293,6 @@ function umbralStep() {
   sfx('hit'); shake(0.2);
 }
 
-function gravebind() {
-  if (!tryCast('bind')) return;
-  const center = player.pos.clone().addScaledVector(aimDir(), 5); clampArena(center);
-  ringFX(center, 0x7c3aed, 9, 0.7, true); pillarFX(center, 0x4c1d95, 6, 0.9, 1.4);
-  sfx('rend');
-  let n = 0;
-  for (const e of enemiesAlive) {
-    const d = dist2D(e.pos, center);
-    if (d > 9 + e.radius) continue;
-    const T = TYPES[e.type];
-    if (!T.boss) e.kb = center.clone().sub(e.pos).setY(0).multiplyScalar(5.5);
-    e.stun = Math.max(e.stun, T.ccImmune ? 0 : T.boss ? 0.6 : 2.2);
-    // Enemy bosses are unstoppable: a stun pauses them but can't cancel an attack already under way.
-    if (!(T.boss && e.team === 'enemy')) { e.pending = null; e.windup = null; e.charge = null; }
-    dealDamage(e, pDmg() * 1.2, player, { noBlock: true });
-    beamFX(center.clone().setY(1), e.pos.clone().setY(1), 0x8b5cf6);
-    n++;
-  }
-  if (n) floatText(center.clone().setY(2), 'BOUND', '#c084fc', 20);
-}
-
 function daggerTempest() {
   if (!tryCast('tempest')) return;
   const f = aimDir(18), base = Math.atan2(f.x, f.z);
@@ -1324,21 +1317,6 @@ function nightSovereignty() {
     u.hp = Math.min(u.maxHp, u.hp + u.maxHp * 0.35);
     pillarFX(u.pos, 0x7c3aed, 5, 0.9, u.radius + 0.4);
   }
-}
-
-function soulSiphon() {
-  if (!tryCast('siphon')) return;
-  let dealt = 0;
-  for (const e of enemiesAlive) {
-    if (dist2D(e.pos, player.pos) > 8 + e.radius) continue;
-    dealt += dealDamage(e, pDmg() * 2, player, { noBlock: true });
-    beamFX(e.pos.clone().setY(1.2), player.pos.clone().setY(1.2), 0xef4444);
-  }
-  const heal = dealt * 0.35 + player.maxHp * 0.1;
-  player.hp = Math.min(player.maxHp, player.hp + heal);
-  floatText(player.pos.clone().setY(2.8), '+' + Math.round(heal), '#4ade80', 20);
-  ringFX(player.pos, 0xdc2626, 8, 0.5, true);
-  sfx('heal');
 }
 
 function inputDir() {
@@ -1702,10 +1680,11 @@ function updateUnit(u, dt) {
     return;
   }
   if (u.kb) { u.pos.addScaledVector(u.kb, dt); u.kb.multiplyScalar(Math.max(0, 1 - dt * 8)); if (u.kb.lengthSq() < 0.01) u.kb = null; }
-  // Enemies left alone for 4s regenerate, so you have to keep the pressure on.
+  // Enemies left alone regenerate, so you have to keep the pressure on.
   if (u.team === 'enemy') {
     u.sinceHit = (u.sinceHit || 0) + dt;
-    if (u.sinceHit > 4 && u.hp < u.maxHp) u.hp = Math.min(u.maxHp, u.hp + u.maxHp * (T.boss ? 0.02 : 0.03) * dt);
+    // Bosses wait longer (8s) and heal slowly (0.5%/s).
+    if (u.sinceHit > (T.boss ? 8 : 4) && u.hp < u.maxHp) u.hp = Math.min(u.maxHp, u.hp + u.maxHp * (T.boss ? 0.005 : 0.03) * dt);
     if (T.boss && u.ai) bossPressure(u, T, dt);
     // After being stunned, a boss shrugs off stuns for 8 seconds.
     if (T.boss) {
@@ -1967,7 +1946,7 @@ function toggleVoice() {
 
 // ================================================================ input
 const KEYMAP = {
-  KeyR: arise, KeyE: shadowRend, KeyF: umbralStep, Digit1: gravebind, Digit2: daggerTempest, Digit3: nightSovereignty, Digit4: soulSiphon,
+  KeyR: arise, KeyE: shadowRend, KeyF: umbralStep, Digit1: daggerTempest, Digit2: nightSovereignty,
   ShiftLeft: dash, ShiftRight: dash, KeyQ: () => deployArmy(), KeyG: recallArmy, KeyV: toggleVoice,
 };
 addEventListener('keydown', e => {
@@ -2010,7 +1989,7 @@ function renderArmyPanel() {
     else st = 'ready';
     return `<tr><td><b>${a.name}</b></td><td>${T.name}</td><td>${T.rank}</td><td>${DEPLOY_COST[T.rank]} MP</td><td class="st-${a.status}">${st}</td></tr>`;
   }).join('');
-  $('army').innerHTML = `<h2>SHADOW ARMY</h2><div class="sub">${army.length} soldiers · can deploy ${armyLimit()} at once (grows with level, max ${MAX_DEPLOYED}) · Q deploys ready shadows for mana · fallen shadows must reform before they can be deployed again</div>
+  $('army').innerHTML = `<h2>SHADOW ARMY</h2><div class="sub">${army.length} soldiers · can deploy ${armyLimit()} soldiers at once (grows with level, max ${MAX_DEPLOYED}) plus your one shadow boss · Q deploys ready shadows for mana · fallen shadows must reform before they can be deployed again</div>
     ${army.length ? `<table><tr><th>Name</th><th>Origin</th><th>Rank</th><th>Deploy</th><th>Status</th></tr>${rows}</table>` : '<p>No shadows yet. Defeat an enemy and press <b>R</b> or say <b>"Arise"</b> near its body.</p>'}`;
 }
 
@@ -2021,16 +2000,16 @@ function setupTouch() {
   document.addEventListener('contextmenu', e => e.preventDefault());
   document.addEventListener('gesturestart', e => e.preventDefault());
 
-  // Ability buttons sit in two arcs around the attack button.
+  // Ability buttons sit in two arcs around the attack button; Deploy is right next to it.
   const ring = [
-    ['dash', 'Dash', 102, -4], ['rend', 'Rend', 102, 31], ['step', 'Step', 102, 63], ['arise', 'ARISE', 102, 96],
-    ['bind', 'Bind', 170, 2], ['tempest', 'Daggers', 170, 30], ['sov', 'Sovereign', 170, 58], ['siphon', 'Siphon', 170, 86],
+    ['deploy', 'Deploy', 102, -4], ['dash', 'Dash', 102, 31], ['rend', 'Rend', 102, 63], ['arise', 'ARISE', 102, 96],
+    ['step', 'Step', 170, 10], ['tempest', 'Daggers', 170, 45], ['sov', 'Sovereign', 170, 80],
   ];
   const cx = 26 + 44, cy = 26 + 44; // attack button centre, measured from the right/bottom edges
   for (const [id, label, r, deg] of ring) {
     const b = document.createElement('button');
     b.className = 'tb'; b.id = 'tb-' + id; b.dataset.act = id;
-    b.innerHTML = `<b>${label}</b>${AB[id].mp ? `<em>${AB[id].mp}</em>` : ''}<div class="cd"></div>`;
+    b.innerHTML = `<b>${label}</b>${AB[id]?.mp ? `<em>${AB[id].mp}</em>` : ''}<div class="cd"></div>`;
     const a = deg * Math.PI / 180;
     b.style.right = `calc(${cx + r * Math.sin(a) - 28}px + env(safe-area-inset-right))`;
     b.style.bottom = `${cy + r * Math.cos(a) - 28}px`;
@@ -2038,7 +2017,7 @@ function setupTouch() {
   }
 
   const ACTIONS = {
-    dash, rend: shadowRend, step: umbralStep, bind: gravebind, tempest: daggerTempest, sov: nightSovereignty, siphon: soulSiphon, arise,
+    dash, rend: shadowRend, step: umbralStep, tempest: daggerTempest, sov: nightSovereignty, arise,
     deploy: () => deployArmy(), recall: recallArmy, army: toggleArmyPanel, voice: toggleVoice,
     pause: () => { if (playing) { paused = !paused; bigText(paused ? 'PAUSED' : ''); } },
   };
@@ -2208,7 +2187,8 @@ function updateHUD() {
   $('mpt').textContent = `${Math.floor(player.mp)} / ${player.maxMp}`;
   $('str').textContent = Math.round(pDmg());
   $('armyc').textContent = army.length;
-  $('activec').textContent = activeShadows().length;
+  $('activec').textContent = activeSoldiers().length;
+  $('bossc').textContent = activeBoss() ? 1 : 0;
   $('limit').textContent = armyLimit();
   $('recc').textContent = army.filter(a => a.status === 'recovering').length;
   $('buff').textContent = [buffT > 0 ? `✦ Night Sovereignty — ${Math.ceil(buffT)}s` : '', player.slowT > 0 ? '❄ Slowed' : '', player.regenOn ? '✚ Regenerating' : player.hp < player.maxHp && player.alive ? `✚ Regen in ${Math.ceil(REGEN_DELAY - player.sinceHit)}s` : ''].filter(Boolean).join(' · ');

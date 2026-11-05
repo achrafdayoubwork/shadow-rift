@@ -9,7 +9,8 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 - **Every kill gives you a level.** Your HP, mana, strength and army size grow as you fight.
 - **Recover between fights.** If you take no damage for 7 seconds, you heal quickly (6% of max HP per second). The next hit you take stops the healing.
 - **Arise.** Press **R**, or turn on voice with **V** and say "Arise!", to raise nearby fallen enemies as shadow soldiers. Each body fades after a short time, and raising it can fail.
-- **Build an army.** Your shadows are saved between sessions. When a shadow falls, it has to reform over time and then costs mana to deploy again. You can have at most 20 shadows on the field at once (the limit starts lower and grows with your level); the rest wait in reserve.
+- **Build an army.** Your shadows are saved between sessions. When a shadow falls, it has to reform over time and then costs mana to deploy again (14 MP for the weakest up to 140 MP for an S-rank).
+- **Army limits.** At most 10 shadow soldiers and 1 shadow boss can fight at once. The soldier limit starts lower and grows with your level; the rest wait in reserve. You can command only one shadow boss: raising a new boss replaces the old one.
 - **Your army has a price.** Each shadow you own makes rift enemies 5% tougher and 2.5% stronger, up to 40 shadows. The rift panel shows the current bonus.
 - **Mana is scarce.** It refills slowly (about 1 per second), so choose your abilities and deployments carefully.
 - **Read the attacks.** Enemies wind up with a glowing flare in their weapon hand before each hit, and red energy gathers around them before a special attack.
@@ -26,6 +27,7 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
     - Below 20% HP they enter a **Last Stand**: 30% more damage, 25% less damage taken, faster abilities.
     - If the fight lasts too long (100 s for guardians, 150 s for major bosses), they **enrage** permanently.
     - After a stun they resist stuns for 8 seconds, and a stun can't cancel an attack they've already started.
+    - Left alone for 8 seconds, they slowly heal (0.5% of max HP per second).
   - **Major boss extras:** the Colossus throws boulders at players who keep their distance, the Alpha chains its charges back to back, and the Lich's soulfire leaves burning ground below half HP.
 
 ## Controls
@@ -34,15 +36,13 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 |---|---|
 | W A S D / Mouse | Move / look (click to lock the mouse) |
 | Left click | Dagger combo |
+| Q / G | Deploy / recall shadows |
 | Shift | Dash (invulnerable while dashing) |
 | E | Shadow Rend: area blast |
 | F | Umbral Step: teleport behind an enemy and backstab |
-| 1 | Gravebind: pull enemies together and stun them |
-| 2 | Dagger Tempest: piercing dagger fan |
-| 3 | Night Sovereignty: empower and heal your army |
-| 4 | Soul Siphon: drain life from nearby enemies |
+| 1 | Dagger Tempest: piercing dagger fan |
+| 2 | Night Sovereignty: empower and heal your army |
 | R | Arise |
-| Q / G | Deploy / recall shadows |
 | V | Voice commands: "Arise", "Come out", "Return" (Chrome or Edge) |
 | Tab | Shadow army roster |
 | P | Pause |
@@ -54,8 +54,8 @@ Open the same link on your phone and turn it sideways. On-screen touch controls 
 - **Left side:** drag to move (joystick)
 - **Right side:** drag to look around; pinch to zoom
 - **⚔ button:** hold to attack. Attacks aim at the nearest enemy automatically.
-- **Button ring:** Dash, Shadow Rend, Umbral Step, Gravebind, Daggers, Sovereign, Siphon and **ARISE**
-- **Top row:** Deploy, Recall, Army roster, Voice ("Arise!") and Pause
+- **Button ring:** **Deploy** (right next to ⚔), Dash, Shadow Rend, Umbral Step, Daggers, Sovereign and **ARISE**
+- **Top row:** Recall, Army roster, Voice ("Arise!") and Pause
 
 The game pauses while the phone is held upright. Graphics quality is lowered slightly on phones so the game runs more smoothly.
 
