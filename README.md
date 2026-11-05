@@ -6,7 +6,7 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 
 ## How it plays
 
-- **Every kill gives you a level.** Your HP, mana, strength and army size grow as you fight.
+- **Every kill gives you a level.** Your HP, mana, strength and army size grow as you fight. Each level adds 20 max HP.
 - **Dodge.** Press **Space** (or the Dodge button on a phone) to roll. It covers less ground than a dash but keeps you invulnerable longer. Rolling through an attack is a **Perfect Dodge** and gives +50% damage for 2 seconds.
 - **Three lives per run.** When you fall:
   - You lose levels: everything gained in that rift, plus 10% (at least 2).
@@ -22,13 +22,18 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 - **Mana is scarce.** It refills slowly (about 1 per second), so choose your abilities and deployments carefully.
 - **Read the attacks.** Enemies wind up with a glowing flare in their weapon hand before each hit, and red energy gathers around them before a special attack.
 - **Clear the rifts.** Waves of goblins, dire wolves, orc brutes, warlocks and armored knights come through rift portals. **Every rift ends with a boss.** Bosses have phases, and their big attacks show a red warning zone on the ground before they hit.
-  - **Every 5th rift** ends with a major boss: the Rift Colossus, the Bloodfang Alpha or the Ashen Lich.
+  - **Every 5th rift** ends with a major boss: the Rift Colossus, the Bloodfang Alpha, the Ashen Lich or the **Void Tyrant**.
+    - **Void Tyrant:** spinning cross-shaped void beams, gravity wells that drag you in before they explode, shadow-step strikes from behind below half HP, and below 25% an Event Horizon that blasts everything except the area close to it.
   - **Every other rift** ends with a Rift Guardian:
     - **Goblin Warchief:** a war cry that enrages nearby enemies, fire bombs that leave burning ground, goblin reinforcements, and permanent bloodlust below 30% HP.
     - **Brood Mother:** venom spit that leaves poison pools, waves of hatchlings, and below half HP it burrows and erupts beneath you.
     - **Crimson Duelist:** chained dash strikes, a parry stance that blocks and punishes close attacks (use ranged attacks), and mirror images.
     - **Rime Warden:** frost nova and ice lances that slow you, and below half HP a frozen armor shell inside a blizzard.
+    - **Storm Herald:** marching lines of lightning, chain lightning that jumps between you and your shadows, and below half HP an overcharge with a static surge that blinks it away.
+    - **Bone Reaper:** a ring-shaped scythe sweep (stand right next to it to stay safe), death marks that hit where you stand three times, soul harvest that drains your shadows to heal it, and risen dead below 40% HP.
+    - **Cinder Hound:** flame rushes that leave burning ground, rings of eruptions around you, and below half HP a trail of fire everywhere it runs.
   - From rift 16, two guardians appear at once.
+  - **A boss never has more than 5 of its summoned guards alive at once.**
   - **Each rift's boss is much stronger than the last:** more HP, more damage, more armor and faster attacks.
   - **All bosses:**
     - Below 20% HP they enter a **Last Stand**: 30% more damage, 25% less damage taken, faster abilities.

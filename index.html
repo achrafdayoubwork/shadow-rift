@@ -366,6 +366,10 @@ const LOOKS = {
   warden:      { base: 'soldier', h: 3.0, tint: 0xa8dcff, emissive: 0x0a2a44, eyes: 0x7dd3fc, weapons: [['R', 'staff']], horns: 0xdbeafe, orb: 0x7dd3fc },
   duelist:     { base: 'soldier', h: 2.3, tint: 0x9a1c30, emissive: 0x1a0006, eyes: 0xff3355, weapons: [['R', 'sword'], ['L', 'sword']] },
   broodmother: { base: 'fox',     h: 3.0, tint: 0x4f7f22, emissive: 0x0a2000 },
+  herald:      { base: 'soldier', h: 2.9, tint: 0xd9c25a, emissive: 0x2a2200, eyes: 0xfde047, weapons: [['R', 'staff']], horns: 0xfef08a, orb: 0xfde047 },
+  reaper:      { base: 'soldier', h: 3.1, tint: 0xd6d3c4, emissive: 0x0c1400, eyes: 0xa3e635, weapons: [['R', 'axe']], horns: 0x1c1917 },
+  hound:       { base: 'fox',     h: 2.6, tint: 0xb4441a, emissive: 0x3a0a00 },
+  tyrant:      { base: 'soldier', h: 4.6, tint: 0x3a2a55, emissive: 0x1a0033, eyes: 0xd946ef, weapons: [['R', 'sword'], ['L', 'sword']], horns: 0x120a1f },
 };
 const gltfs = {}, templates = {};
 let MODELS_OK = false;
@@ -565,6 +569,10 @@ const FALLBACK = {
   warden:      sh => makeHumanoid({ shadow: sh, scale: 1.3, skin: 0xbfe3ff, cloth: 0x1e3a5f, eye: 0x7dd3fc, hood: true, horns: true, weapon: 'staff', orb: 0x7dd3fc }),
   duelist:     sh => makeHumanoid({ shadow: sh, scale: 1.0, skin: 0xd9b8a0, cloth: 0x7f1d1d, eye: 0xff3355, helmet: true, weapon: 'sword', offhand: 'sword' }),
   broodmother: sh => makeWolf(sh, 1.9, 0x4d7c0f),
+  herald:      sh => makeHumanoid({ shadow: sh, scale: 1.25, skin: 0xe8d27a, cloth: 0x3f3a1a, eye: 0xfde047, hood: true, horns: true, weapon: 'staff', orb: 0xfde047 }),
+  reaper:      sh => makeHumanoid({ shadow: sh, scale: 1.35, skin: 0xd6d3c4, cloth: 0x1c1917, eye: 0xa3e635, hood: true, weapon: 'axe' }),
+  hound:       sh => makeWolf(sh, 1.7, 0x9a3412),
+  tyrant:      sh => makeHumanoid({ shadow: sh, scale: 2.0, skin: 0x3b2a55, cloth: 0x140a24, eye: 0xd946ef, helmet: true, horns: true, weapon: 'sword', offhand: 'sword' }),
 };
 function animRig(u, dt) {
   const rig = u.rig;
@@ -604,17 +612,21 @@ const TYPES = {
   colossus: { name: 'Rift Colossus',   rank: 'S', hp: 20000, dmg: 54, speed: 2.6, range: 2.6, cd: 1.9, radius: 1.9,  h: 7.2, armor: 0.5, boss: true, ccImmune: true },
   alpha:    { name: 'Bloodfang Alpha', rank: 'S', hp: 15000, dmg: 40, speed: 7.2, range: 1.8, cd: 0.9, radius: 1.5,  h: 3.4, armor: 0.38, boss: true },
   lich:     { name: 'Ashen Lich',      rank: 'S', hp: 13000, dmg: 33, speed: 3.2, range: 14,  cd: 1.5, radius: 0.9,  h: 3.4, armor: 0.38, boss: true, ranged: true, kite: true },
+  tyrant:   { name: 'Void Tyrant',     rank: 'S', hp: 17000, dmg: 44, speed: 3.6, range: 2.4, cd: 1.4, radius: 1.4,  h: 4.6, armor: 0.42, boss: true },
   // Rift Guardians: the boss waiting at the end of every rift that isn't a major boss gate.
   warchief:    { name: 'Goblin Warchief', rank: 'A', hp: 3600, dmg: 19, speed: 3.6, range: 1.7, cd: 1.2, radius: 0.9, h: 2.7, armor: 0.33, boss: true, guardian: true },
   warden:      { name: 'Rime Warden',     rank: 'A', hp: 4000, dmg: 20, speed: 2.8, range: 10,  cd: 1.8, radius: 1.0, h: 3.0, armor: 0.38, boss: true, guardian: true, ranged: true, kite: true },
   duelist:     { name: 'Crimson Duelist', rank: 'A', hp: 3300, dmg: 22, speed: 4.9, range: 1.6, cd: 0.8, radius: 0.7, h: 2.3, armor: 0.28, boss: true, guardian: true },
   broodmother: { name: 'Brood Mother',    rank: 'A', hp: 4400, dmg: 20, speed: 3.8, range: 1.8, cd: 1.3, radius: 1.5, h: 3.0, armor: 0.33, boss: true, guardian: true },
+  herald:      { name: 'Storm Herald',    rank: 'A', hp: 3800, dmg: 20, speed: 3.4, range: 9,   cd: 1.6, radius: 0.9, h: 2.9, armor: 0.33, boss: true, guardian: true, ranged: true, kite: true },
+  reaper:      { name: 'Bone Reaper',     rank: 'A', hp: 4200, dmg: 23, speed: 4.0, range: 2.2, cd: 1.3, radius: 0.9, h: 3.1, armor: 0.35, boss: true, guardian: true },
+  hound:       { name: 'Cinder Hound',    rank: 'A', hp: 3900, dmg: 21, speed: 6.0, range: 1.6, cd: 1.0, radius: 1.3, h: 2.6, armor: 0.3,  boss: true, guardian: true },
 };
 const RANK_IDX = { E: 0, D: 1, C: 2, B: 3, A: 4, S: 5 };
 const DEPLOY_COST = { E: 14, D: 22, C: 35, B: 55, A: 90, S: 140 };
 const RECOVER_TIME = { E: 20, D: 30, C: 40, B: 55, A: 100, S: 150 };
 const SHADOW_NAMES = ['Grim', 'Vex', 'Ashen', 'Morrow', 'Fang', 'Tusk', 'Rook', 'Wraith', 'Cinder', 'Hollow', 'Onyx', 'Dusk', 'Raze', 'Thorn', 'Gloom', 'Nox', 'Mire', 'Sable', 'Husk', 'Vigil'];
-const SPECIAL_NAMES = { colossus: ['Behemoth', 'Monolith'], alpha: ['Crimson Maw', 'Nightfang'], lich: ['Hollow King', 'Pale Regent'], warchief: ['Gorrak', 'Ironjaw'], warden: ['Frostveil', 'Hoarfang'], duelist: ['Scarlet Edge', 'Vesper'], broodmother: ['Venomqueen', 'Mother Mire'], knight: ['Sir Vael', 'Oathbreaker', 'Grimguard', 'Black Aegis'] };
+const SPECIAL_NAMES = { colossus: ['Behemoth', 'Monolith'], alpha: ['Crimson Maw', 'Nightfang'], lich: ['Hollow King', 'Pale Regent'], warchief: ['Gorrak', 'Ironjaw'], warden: ['Frostveil', 'Hoarfang'], duelist: ['Scarlet Edge', 'Vesper'], broodmother: ['Venomqueen', 'Mother Mire'], herald: ['Stormcaller', 'Voltaris'], reaper: ['Gravetide', 'Hollow Scythe'], hound: ['Emberfang', 'Ashmaw'], tyrant: ['Abyssal Crown', 'Nullkaiser'], knight: ['Sir Vael', 'Oathbreaker', 'Grimguard', 'Black Aegis'] };
 
 // ================================================================ abilities
 const AB = {
@@ -692,9 +704,10 @@ const player = {
 player.pos = player.root.position;
 scene.add(player.root);
 const aura = new THREE.PointLight(0x8b5cf6, 6, 9); aura.position.y = 2; player.root.add(aura);
+const HP_PER_LEVEL = 20; // max HP gained every level
 function recalcStats() {
   const L = player.level;
-  player.maxHp = Math.round(160 + L * 7); player.maxMp = Math.round(90 + L * 2.5);
+  player.maxHp = Math.round(160 + L * HP_PER_LEVEL); player.maxMp = Math.round(90 + L * 2.5);
   player.str = 12 + L * 0.6; player.speed = 7 + Math.min(2.5, L * 0.03);
   aura.intensity = 6 + Math.min(20, L * 0.2);
 }
@@ -902,6 +915,16 @@ function updateHazards(dt) {
   hazards = hazards.filter(h => {
     h.life -= dt; h.tick -= dt;
     h.m.material.opacity = (0.25 + 0.12 * Math.sin(time * 6)) * Math.min(1, h.life);
+    if (h.pull) { // gravity wells drag everything on the other side toward their centre
+      h.m.rotation.y += dt * 3;
+      for (const o of h.team === 'enemy' ? foesOfEnemy : enemiesAlive) {
+        if (!isAlive(o) || (!o.isPlayer && TYPES[o.type].boss)) continue;
+        const dx = h.pos.x - o.pos.x, dz = h.pos.z - o.pos.z, dd = Math.hypot(dx, dz);
+        if (dd > h.r || dd < 0.4) continue;
+        o.pos.x += dx / dd * h.pull * dt; o.pos.z += dz / dd * h.pull * dt;
+      }
+      if (Math.random() < dt * 30) burstFX(h.pos.clone().add(new THREE.Vector3((Math.random() - 0.5) * h.r * 2, 0.3, (Math.random() - 0.5) * h.r * 2)), 0xc084fc, 1, 1);
+    }
     if (h.tick <= 0) {
       h.tick = 0.5;
       const pool = h.team === 'enemy' ? foesOfEnemy : enemiesAlive;
@@ -1077,10 +1100,12 @@ function sinkAway(u, dur = 0.9) {
 function levelUp(killedName, src, quiet = false) {
   player.level++;
   recalcStats();
-  player.hp = Math.min(player.maxHp, player.hp + player.maxHp * 0.06);
+  // The new max HP is added to current HP too, plus a 6% heal.
+  player.hp = Math.min(player.maxHp, player.hp + HP_PER_LEVEL + player.maxHp * 0.06);
   sfx('lvl');
   pillarFX(player.pos, 0x60a5fa, 6, 0.8, 0.9);
   floatText(player.pos.clone().setY(3.2), 'LEVEL UP!', '#93c5fd', 20);
+  floatText(player.pos.clone().setY(2.7), `+${HP_PER_LEVEL} MAX HP`, '#4ade80', 15);
   if (!quiet) {
     const by = src && !src.isPlayer && src.name ? ` (by ${src.name})` : '';
     notify(`<b>${killedName}</b> defeated${by} · <span style="color:#93c5fd">Level up! → Lv. ${player.level}</span>`, 'gold');
@@ -1483,7 +1508,7 @@ function shoot(u, tg) {
   const n = u.type === 'lich' ? (u.hp / u.maxHp < 0.5 ? 5 : 3) : 1;
   for (let i = 0; i < n; i++) {
     const dir = base.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), (i - (n - 1) / 2) * 0.22);
-    const color = u.team === 'enemy' ? ({ lich: 0x00ffcc, warden: 0x7dd3fc }[u.type] ?? 0xff5a1f) : 0xb46cff;
+    const color = u.team === 'enemy' ? ({ lich: 0x00ffcc, warden: 0x7dd3fc, herald: 0xfde047 }[u.type] ?? 0xff5a1f) : 0xb46cff;
     const m = new THREE.Mesh(new THREE.SphereGeometry(u.type === 'lich' ? 0.35 : 0.22, 10, 10), new THREE.MeshBasicMaterial({ color }));
     m.position.copy(start); scene.add(m);
     projectiles.push({ m, v: dir.multiplyScalar(u.type === 'lich' ? 18 : 16), team: u.team, dmg: unitDmg(u) * (0.9 + Math.random() * 0.2), life: 2, src: u, r: 0.35, slow: u.type === 'warden' ? 0.8 : 0 });
@@ -1508,13 +1533,18 @@ function updateCharge(u, dt) {
   if (c.left <= 0 || Math.hypot(u.pos.x, u.pos.z) > ARENA_R - 1.5) u.charge = null;
 }
 
+// A boss can never have more than 5 of its summoned guards alive at once.
+const MAX_GUARDS = 5;
 function summonMinions(u, list) {
+  u.minions = (u.minions || []).filter(m => m.alive);
+  list = list.slice(0, Math.max(0, MAX_GUARDS - u.minions.length));
   const spawned = list.map((t, i) => {
     const a = (i / list.length) * TAU;
     const p = u.pos.clone().add(new THREE.Vector3(Math.cos(a) * 3.5, 0, Math.sin(a) * 3.5)); clampArena(p);
     pillarFX(p, 0x00ffcc, 6, 0.8, 0.8);
     return spawnUnit(t, 'enemy', p);
   });
+  u.minions.push(...spawned);
   return spawned;
 }
 
@@ -1533,10 +1563,15 @@ function bossAI(u, tg, d, dt) {
         bigText('HOWL', 'The pack answers'); sfx('roar'); shake(0.4);
         summonMinions(u, ['wolf', 'wolf', 'wolf', th < 0.5 ? 'wolf' : 'goblin']);
       }
+    } else if (u.type === 'tyrant') {
+      if (frac < 0.5 && ai.phase < 2) { ai.phase = 2; u.speed *= 1.2; setAura(u, 'void', 0xa855f7, T.radius + 1.2); bigText('VOID ASCENDANT', 'The Tyrant steps through shadow'); sfx('roar'); shake(0.6); }
+      if (frac < 0.25 && ai.phase < 3) { ai.phase = 3; bigText('EVENT HORIZON', 'Stay close to the Tyrant — the edges collapse'); sfx('roar'); shake(0.8); }
     } else if (u.type === 'lich') {
       for (const [th, list] of [[0.6, ['knight', 'knight', 'knight', 'knight']], [0.25, ['knight', 'warlock', 'warlock', 'knight', 'knight']]]) if (frac < th && !ai['sum' + th]) {
         ai['sum' + th] = true;
-        u.guards = summonMinions(u, list); u.shielded = true;
+        const fresh = summonMinions(u, list);
+        if (!fresh.length) continue; // already at the 5-guard limit
+        u.guards = [...(u.guards || []), ...fresh]; u.shielded = true;
         if (!u.shieldMesh) { u.shieldMesh = new THREE.Mesh(new THREE.SphereGeometry(T.radius + 1.4, 24, 16), fxMat(0x00ffcc, 0.18)); scene.add(u.shieldMesh); }
         bigText('SHIELDED', 'Destroy the Lich’s guards to break the barrier'); sfx('roar');
       }
@@ -1611,6 +1646,57 @@ function bossAI(u, tg, d, dt) {
       const a = Math.random() * TAU;
       u.pos.set(tg.pos.x + Math.cos(a) * 12, 0, tg.pos.z + Math.sin(a) * 12); clampArena(u.pos);
       burstFX(u.pos.clone().setY(1.5), 0x00ffcc, 16, 6);
+      return true;
+    }
+  } else if (u.type === 'tyrant') {
+    // Void Tyrant: rotating void beams, gravity wells, shadow-step strikes (phase 2),
+    // and a collapsing outer ring that forces you in close (phase 3).
+    const tick = (k, start) => { ai[k] = (ai[k] ?? start) - dt; return ai[k] <= 0; };
+    const vd = unitDmg(u), col = '#e879f9';
+    if (ai.strikes > 0) {
+      ai.strikes--;
+      burstFX(u.pos.clone().setY(2), 0xa855f7, 14, 6);
+      const behind = tg.pos.clone().addScaledVector(fwdOf(tg), -2.8); clampArena(behind);
+      u.pos.set(behind.x, 0, behind.z); faceToward(u, tg.pos, 1);
+      burstFX(u.pos.clone().setY(2), 0xa855f7, 14, 6);
+      telegraph({ pos: tg.pos.clone(), r: 2.8, t: 0.7, team: u.team, dmg: vd * 1.6, src: u, kb: 7 });
+      u.windup = { t: 0.95, fn: () => { u.attackT = 1; } };
+      return true;
+    }
+    if (enemy && ai.phase >= 3 && tick('horizonT', 1)) {
+      ai.horizonT = 15;
+      telegraph({ pos: u.pos.clone(), inner: 9, r: 34, t: 2.2, team: u.team, dmg: vd * 2.2, src: u, kb: 6, shake: 0.7 });
+      say(u, 'EVENT HORIZON', col);
+      u.windup = { t: 0.8, fn: () => { u.attackT = 1; } };
+      return true;
+    }
+    if (tick('crossT', 3) && d < 26) {
+      ai.crossT = ai.phase >= 2 ? 6 : 8;
+      const base = Math.atan2(tg.pos.x - u.pos.x, tg.pos.z - u.pos.z), waves = ai.phase >= 2 ? 3 : 2;
+      for (let w = 0; w < waves; w++) later(w * 0.9, () => {
+        if (!u.alive) return;
+        for (let k = 0; k < 4; k++) {
+          const a = base + k * Math.PI / 2 + w * Math.PI / 4;
+          telegraph({ pos: u.pos.clone(), rect: { dir: new THREE.Vector3(Math.sin(a), 0, Math.cos(a)), len: 24, width: 2.6 }, t: 1.0, team: u.team, dmg: vd * 1.5, src: u });
+        }
+      });
+      say(u, 'VOID CROSS', col);
+      u.windup = { t: 0.6, fn: () => { u.attackT = 1; } };
+      return true;
+    }
+    if (tick('wellT', 6) && d < 28) {
+      ai.wellT = ai.phase >= 2 ? 9 : 12;
+      const p = scatter(tg.pos, 2); clampArena(p);
+      hazard({ pos: p, r: 9, life: 3.2, dps: vd * 0.25, team: u.team, src: u, color: 0x9333ea, pull: 3.2 });
+      telegraph({ pos: p, r: 3.2, t: 3.2, team: u.team, dmg: vd * 2.4, src: u, kb: 14, shake: 0.6 });
+      say(u, 'GRAVITY WELL', col);
+      if (enemy) notify('A <b>Gravity Well</b> is pulling you in — walk or dash out before it collapses!', 'red');
+      u.windup = { t: 0.5, fn: () => { u.attackT = 1; } };
+      return true;
+    }
+    if (enemy && ai.phase >= 2 && tick('stepT', 4)) {
+      ai.stepT = ai.phase >= 3 ? 8 : 11; ai.strikes = 3;
+      say(u, 'SHADOW STEP', col);
       return true;
     }
   } else if (T.guardian) {
@@ -1721,6 +1807,111 @@ function guardianAI(u, tg, d, dt) {
       telegraph({ pos: p, r: 4.5, t: 1.8, team: u.team, dmg: unitDmg(u) * 2.2, src: u, kb: 12, shake: 0.6 });
       say(u, 'BURROW', '#bef264');
       u.windup = { t: 1.8, fn: () => { u.pos.set(p.x, 0, p.z); u.root.visible = true; u.burrowed = false; burstFX(u.pos.clone().setY(0.5), 0x65a30d, 24, 8); } };
+      return true;
+    }
+  } else if (u.type === 'herald') {
+    // Marching lightning lines, chain lightning that jumps between targets, and an overcharged blink-nova below half HP.
+    const over = enemy && frac < 0.5, vd = unitDmg(u);
+    if (over && !ai.over) { ai.over = true; u.speed *= 1.3; setAura(u, 'storm', 0xfde047, T.radius + 1); bigText('OVERCHARGED', 'The Herald crackles with power'); sfx('roar'); shake(0.4); }
+    if (!tg) return false;
+    if (over && tick('surgeT', 2) && d < 6) {
+      ai.surgeT = 7;
+      telegraph({ pos: u.pos.clone(), r: 6.5, t: 0.9, team: u.team, dmg: vd * 1.6, src: u, kb: 10, shake: 0.4 });
+      say(u, 'STATIC SURGE', '#fde047');
+      u.windup = { t: 0.95, fn: () => {
+        burstFX(u.pos.clone().setY(1.5), 0xfde047, 16, 6);
+        const a = Math.random() * TAU; u.pos.set(tg.pos.x + Math.cos(a) * 11, 0, tg.pos.z + Math.sin(a) * 11); clampArena(u.pos);
+        burstFX(u.pos.clone().setY(1.5), 0xfde047, 16, 6);
+      } };
+      return true;
+    }
+    if (tick('stormT', 3) && d < 26) {
+      ai.stormT = over ? 4.5 : 6.5;
+      const dir = tg.pos.clone().sub(u.pos).setY(0).normalize(), from = u.pos.clone();
+      for (const off of over ? [-0.35, 0, 0.35] : [0]) {
+        const dd = dir.clone().applyAxisAngle(new THREE.Vector3(0, 1, 0), off);
+        for (let i = 1; i <= 8; i++) later(i * 0.12, () => telegraph({ pos: from.clone().addScaledVector(dd, i * 2.8), r: 1.7, t: 0.6, team: u.team, dmg: vd * 1.3, src: u, shake: 0.05 }));
+      }
+      say(u, 'THUNDER MARCH', '#fde047');
+      u.windup = { t: 0.5, fn: () => { u.attackT = 1; } };
+      return true;
+    }
+    if (tick('chainT', 5) && d < 22) {
+      ai.chainT = over ? 6 : 8;
+      const picks = [tg, ...foes.filter(o => o !== tg).sort((a, b) => dist2D(a.pos, tg.pos) - dist2D(b.pos, tg.pos)).slice(0, over ? 4 : 2)];
+      let prev = u;
+      picks.forEach((o, i) => { const from = prev; prev = o; later(i * 0.25, () => {
+        if (!isAlive(o)) return;
+        beamFX(from.pos.clone().setY(1.6), o.pos.clone().setY(1.2), 0xfde047);
+        telegraph({ pos: o.pos.clone(), r: 2.2, t: 0.7, team: u.team, dmg: vd * 1.5, src: u, slow: 1 });
+      }); });
+      say(u, 'CHAIN LIGHTNING', '#fde047');
+      u.windup = { t: 0.4, fn: () => { u.attackT = 1; } };
+      return true;
+    }
+  } else if (u.type === 'reaper') {
+    // A ring-shaped scythe sweep (safe only up close), death marks that follow you, and harvesting your shadows' life.
+    const vd = unitDmg(u);
+    if (enemy && frac < 0.4 && !ai.rise) { ai.rise = true; summonMinions(u, ['knight', 'knight', 'warlock', 'knight']); bigText('GRAVE RISE', 'The dead answer the Reaper'); sfx('roar'); }
+    if (!tg) return false;
+    if (tick('sweepT', 3) && d < 7.5) {
+      ai.sweepT = frac < 0.5 ? 4.5 : 6;
+      telegraph({ pos: u.pos.clone(), inner: 2.4, r: 7.5, t: 0.9, team: u.team, dmg: vd * 1.7, src: u, kb: 9, shake: 0.3 });
+      say(u, 'REAPING SWEEP', '#d9f99d');
+      u.windup = { t: 0.9, fn: () => { u.attackT = 1; } };
+      return true;
+    }
+    if (tick('markT', 5)) {
+      ai.markT = frac < 0.5 ? 9 : 12;
+      const target = tg;
+      floatText(target.pos.clone().setY(3), 'DEATH MARK', '#a3e635', 18);
+      for (let i = 0; i < 3; i++) later(0.6 + i * 1.1, () => {
+        if (isAlive(target)) telegraph({ pos: target.pos.clone(), r: 3.2, t: 1.0, team: u.team, dmg: vd * 1.8, src: u, pool: { r: 2.4, life: 4, dps: vd * 0.5, color: 0xa3e635 } });
+      });
+      say(u, 'DEATH MARK', '#a3e635');
+      u.windup = { t: 0.5, fn: () => { u.attackT = 1; } };
+      return true;
+    }
+    if (tick('harvestT', 6)) {
+      const near = foes.filter(o => !o.isPlayer && dist2D(o.pos, u.pos) < 12);
+      if (!near.length) { ai.harvestT = 2; return false; }
+      ai.harvestT = 10;
+      let got = 0;
+      for (const o of near) { got += dealDamage(o, vd * 1.2, u, { noBlock: true }); beamFX(o.pos.clone().setY(1.2), u.pos.clone().setY(T.h * 0.6), 0xa3e635); }
+      const heal = Math.min(u.maxHp * 0.03, got * 0.5);
+      u.hp = Math.min(u.maxHp, u.hp + heal);
+      floatText(u.pos.clone().setY(T.h + 0.6), '+' + Math.round(heal), '#a3e635', 16);
+      say(u, 'SOUL HARVEST', '#a3e635');
+      return true;
+    }
+  } else if (u.type === 'hound') {
+    // Charges that leave burning ground, ring eruptions around you, and a fire trail once enraged.
+    const blaze = enemy && frac < 0.5, vd = unitDmg(u), fire = 0xff6a1a;
+    if (blaze && !ai.blaze) { ai.blaze = true; u.speed *= 1.2; setAura(u, 'fire', fire, T.radius + 0.8); bigText('INFERNO', 'The Hound is wreathed in flame'); sfx('roar'); shake(0.4); }
+    if (blaze && tick('trailT', 0.6)) { ai.trailT = 0.6; hazard({ pos: u.pos.clone(), r: 1.6, life: 4, dps: vd * 0.5, team: u.team, src: u, color: fire }); }
+    if (!tg) return false;
+    if (tick('rushT', 3) && d > 3 && d < 22) {
+      ai.rushT = blaze ? 4 : 6;
+      const dir = tg.pos.clone().sub(u.pos).setY(0).normalize(), from = u.pos.clone();
+      u.root.rotation.y = Math.atan2(dir.x, dir.z);
+      telegraph({ pos: from, rect: { dir, len: 18, width: u.radius * 2 + 1 }, t: 0.8, team: u.team, dmg: 0 });
+      u.windup = { t: 0.8, fn: () => {
+        startCharge(u, dir, 18, 30, vd * 1.6);
+        for (let i = 1; i <= 6; i++) later(i * 0.1, () => hazard({ pos: from.clone().addScaledVector(dir, i * 3), r: 1.8, life: 5, dps: vd * 0.6, team: u.team, src: u, color: fire }));
+      } };
+      say(u, 'FLAME RUSH', '#fdba74'); sfx('roar');
+      return true;
+    }
+    if (tick('eruptT', 5) && d < 20) {
+      ai.eruptT = blaze ? 6 : 8;
+      const c = tg.pos.clone(), n = blaze ? 8 : 6;
+      telegraph({ pos: c, r: 2.2, t: 1.1, team: u.team, dmg: vd * 1.5, src: u, shake: 0.2 });
+      for (let i = 0; i < n; i++) {
+        const a = i / n * TAU, p = c.clone().add(new THREE.Vector3(Math.cos(a) * 4.5, 0, Math.sin(a) * 4.5)); clampArena(p);
+        telegraph({ pos: p, r: 2.2, t: 1.45, team: u.team, dmg: vd * 1.5, src: u, pool: { r: 1.8, life: 3, dps: vd * 0.5, color: fire } });
+      }
+      say(u, 'ERUPTION', '#fdba74');
+      u.windup = { t: 0.6, fn: () => { u.attackT = 1; } };
       return true;
     }
   }
@@ -1919,8 +2110,8 @@ function updateCorpses(dt) {
 
 // ================================================================ rifts
 const rankOf = n => n <= 2 ? 'E' : n <= 4 ? 'D' : n <= 7 ? 'C' : n <= 10 ? 'B' : n <= 14 ? 'A' : 'S';
-const BOSS_ORDER = ['colossus', 'alpha', 'lich'];
-const GUARDIAN_ORDER = ['warchief', 'broodmother', 'duelist', 'warden'];
+const BOSS_ORDER = ['colossus', 'alpha', 'lich', 'tyrant'];
+const GUARDIAN_ORDER = ['warchief', 'broodmother', 'duelist', 'warden', 'herald', 'reaper', 'hound'];
 let bossQueue = [], bossT = 0;
 // Each rift is a wave of regular enemies followed by a boss fight at the end.
 // Every 5th rift ends with a major boss; every other rift ends with a Rift Guardian.
@@ -1928,8 +2119,8 @@ function riftPlan(n) {
   const p = [], add = (t, c) => { for (let i = 0; i < c; i++) p.push(t); };
   if (n % 5 === 0) {
     add('knight', 1 + Math.floor(n / 10)); add('warlock', 1 + Math.floor(n / 15)); add('orc', 1);
-    const cyc = n / 5, bosses = [BOSS_ORDER[(cyc - 1) % 3]];
-    if (cyc >= 4) bosses.push(BOSS_ORDER[cyc % 3]);
+    const cyc = n / 5, B = BOSS_ORDER.length, bosses = [BOSS_ORDER[(cyc - 1) % B]];
+    if (cyc >= 5) bosses.push(BOSS_ORDER[cyc % B]);
     return { wave: p, bosses };
   }
   if (n === 1) add('goblin', 6);
@@ -1942,8 +2133,8 @@ function riftPlan(n) {
     for (let i = 0; i < 8 + Math.floor(n * 1.5); i++) p.push(pool[Math.floor(Math.random() * pool.length)]);
   }
   const g = n - 1 - Math.floor(n / 5);
-  const bosses = [GUARDIAN_ORDER[g % 4]];
-  if (n >= 16) bosses.push(GUARDIAN_ORDER[(g + 2) % 4]);
+  const G = GUARDIAN_ORDER.length, bosses = [GUARDIAN_ORDER[g % G]];
+  if (n >= 16) bosses.push(GUARDIAN_ORDER[(g + 3) % G]);
   return { wave: p, bosses };
 }
 function startRift(n) {
