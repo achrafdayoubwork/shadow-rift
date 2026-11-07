@@ -18,7 +18,9 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 - **Recover between fights.** If you take no damage for 7 seconds, you heal quickly (6% of max HP per second). The next hit you take stops the healing.
 - **Arise.** Press **R**, or turn on voice with **V** and say "Arise!", to raise nearby fallen enemies as shadow soldiers. Each body fades after a short time, and raising it can fail.
 - **Build an army.** Your shadows are saved between sessions. When a shadow falls, it has to reform over time and then costs mana to deploy again (14 MP for the weakest up to 140 MP for an S-rank).
-- **Army limits.** At most 10 shadow soldiers and 1 shadow boss can fight at once. The soldier limit starts lower and grows with your level; the rest wait in reserve. You can command only one shadow boss: raising a new boss replaces the old one.
+- **Army limits.** At most 10 shadow soldiers and 1 shadow boss can fight at once. The soldier limit starts lower and grows with your level; the rest wait in reserve. You can own as many boss shadows as you raise, but only one fights at a time.
+- **Choose who fights.** Pressing **Q** (or Deploy on a phone) pauses the game and opens a list of your shadows. Tap or click the ones you want, see the total MP cost and the free slots, then press Deploy (or Enter). "Auto-pick best" fills the slots with your strongest shadows.
+- **Save and continue later.** Press **Esc** (or the ❚❚ button in the top-left corner on a phone) to pause. From there you can resume, or **Save & Exit** back to the title screen. Your level, army and current rift are saved; the title screen then offers **Continue** from that rift, with the lives you had left, or a new run from Rift 1. Progress is also saved at the start of every rift.
 - **Your army has a price.** Each shadow you own makes rift enemies 5% tougher and 2.5% stronger, up to 40 shadows. The rift panel shows the current bonus.
 - **Mana is scarce.** It refills slowly (about 1 per second), so choose your abilities and deployments carefully.
 - **Read the attacks.** Enemies wind up with a glowing flare in their weapon hand before each hit, and red energy gathers around them before a special attack.
@@ -49,7 +51,8 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 |---|---|
 | W A S D / Mouse | Move / look (click to lock the mouse) |
 | Left click | Dagger combo |
-| Q / G | Deploy / recall shadows |
+| Q | Pause and pick which shadows to deploy |
+| G | Recall shadows |
 | Shift | Dash (invulnerable while dashing) |
 | Space | Dodge roll (Perfect Dodge: +50% damage for 2 s) |
 | E | Shadow Rend: area blast |
@@ -57,9 +60,10 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 | 1 | Dagger Tempest: piercing dagger fan |
 | 2 | Night Sovereignty: empower and heal your army |
 | R | Arise |
-| V | Voice commands: "Arise", "Come out", "Return" (Chrome or Edge) |
+| V | Voice commands: "Arise", "Come out" (deploys your best shadows automatically), "Return" (Chrome or Edge) |
 | Tab | Shadow army roster |
-| P | Pause |
+| Esc | Pause menu: resume, or save & exit |
+| P | Quick pause |
 
 ### On a phone or tablet
 
@@ -69,7 +73,8 @@ Open the same link on your phone and turn it sideways. On-screen touch controls 
 - **Right side:** drag to look around; pinch to zoom
 - **⚔ button:** hold to attack. Attacks aim at the nearest enemy automatically.
 - **Button ring:** **Deploy** (right next to ⚔), Dash, Dodge, Shadow Rend, Umbral Step, Daggers, Sovereign and **ARISE**
-- **Top row:** Recall, Army roster, Voice ("Arise!") and Pause
+- **Top-left ❚❚:** pause menu (resume, or save & exit)
+- **Top row:** Recall, Army roster and Voice ("Arise!")
 
 The game pauses while the phone is held upright. Graphics quality is lowered slightly on phones so the game runs more smoothly.
 

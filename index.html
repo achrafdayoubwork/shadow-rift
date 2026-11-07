@@ -81,6 +81,21 @@
   #army table { width: 100%; border-collapse: collapse; font-size: 13px; }
   #army td, #army th { padding: 5px 6px; border-bottom: 1px solid rgba(150,110,255,.18); text-align: left; }
   #army th { color: #a99bd6; font-weight: 500; }
+  #army, #deployMenu { touch-action: pan-y; }
+  #deployMenu { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 700px; max-width: 94vw; max-height: 84vh; overflow: auto; padding: 18px; z-index: 30; }
+  #deployMenu h2 { margin: 0 0 4px; letter-spacing: 4px; font-size: 18px; }
+  #deployMenu .sub { color: #a99bd6; font-size: 12px; margin: 6px 0 10px; }
+  #deployMenu table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  #deployMenu td, #deployMenu th { padding: 6px; border-bottom: 1px solid rgba(150,110,255,.18); text-align: left; }
+  #deployMenu th { color: #a99bd6; font-weight: 500; }
+  #deployMenu tr.pick { cursor: pointer; }
+  #deployMenu tr.pick:hover { background: rgba(139, 92, 246, .14); }
+  #deployMenu tr.sel { background: rgba(139, 92, 246, .32); cursor: pointer; }
+  #deployMenu tr.off { opacity: .45; }
+  #deployMenu .ck { width: 22px; font-size: 16px; color: #c4b5fd; }
+  #deployMenu .bosstag { font-size: 10px; color: #fca5a5; border: 1px solid #f87171; border-radius: 4px; padding: 0 4px; margin-left: 4px; }
+  #deployMenu .dm-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 12px; }
+  #pauseMenu .card button { margin: 6px; min-width: 220px; }
   .st-active { color: #c084fc; } .st-stored { color: #9ca3af; } .st-recovering { color: #f87171; }
   .rec { display: inline-block; width: 80px; height: 6px; background: rgba(255,255,255,.1); border-radius: 3px; overflow: hidden; vertical-align: middle; margin-left: 6px; }
   .rec i { display: block; height: 100%; background: #f87171; }
@@ -121,7 +136,11 @@
   #rotate { display: none; z-index: 50; }
   @media (orientation: portrait) { body.touch #rotate { display: flex; } }
   body.touch #skills, body.touch #lockHint { display: none; }
-  body.touch #status { width: 205px; padding: 6px 9px; top: 8px; left: calc(8px + env(safe-area-inset-left)); }
+  body.touch #status { width: 205px; padding: 6px 9px; top: 8px; left: calc(58px + env(safe-area-inset-left)); }
+  #tu-menu { position: absolute; top: 8px; left: calc(8px + env(safe-area-inset-left)); pointer-events: auto; font-size: 18px; padding: 8px 12px; }
+  body.touch #deployMenu { padding: 10px; }
+  body.touch #deployMenu table { font-size: 11px; }
+  body.touch #deployMenu td { padding: 7px 4px; }
   body.touch #status .name { font-size: 11px; }
   body.touch #status .lvl { margin: 0 0 3px; font-size: 11px; }
   body.touch #status .lvl b { font-size: 17px; }
@@ -175,6 +194,17 @@
 </div>
 
 <div id="army" class="panel hidden"></div>
+<div id="deployMenu" class="panel hidden"></div>
+
+<div id="pauseMenu" class="overlay hidden">
+  <div class="card panel">
+    <h1 style="font-size:40px;letter-spacing:10px">PAUSED</h1>
+    <div class="tag" id="pauseInfo"></div>
+    <button id="resumeBtn">RESUME</button><br>
+    <button id="saveExitBtn">SAVE &amp; EXIT</button>
+    <div class="tag" style="margin-top:10px">Your level, shadow army and current rift are saved. Continue later from the title screen.</div>
+  </div>
+</div>
 
 <div id="touch" class="hidden">
   <div id="stickZone"></div>
@@ -184,8 +214,8 @@
     <button class="tu" data-act="recall">Recall</button>
     <button class="tu" data-act="army">Army</button>
     <button class="tu" id="tu-voice" data-act="voice">🎙 Voice</button>
-    <button class="tu" data-act="pause">❚❚</button>
   </div>
+  <button class="tu" id="tu-menu" data-act="menu" title="Pause / save &amp; exit">❚❚</button>
   <button class="tb" id="tb-attack" data-act="attack">⚔</button>
 </div>
 
@@ -200,7 +230,7 @@
       <b>Right side</b><span>Drag to look around</span>
       <b>⚔</b><span>Hold to attack — auto-aims at the nearest enemy</span>
       <b>Ring</b><span>Deploy (next to ⚔), Dash, Dodge, Shadow Rend, Umbral Step, Daggers, Sovereign, ARISE</span>
-      <b>Top</b><span>Recall shadows, army roster, voice ("Arise!"), pause</span>
+      <b>Top</b><span>Recall shadows, army roster, voice ("Arise!") · top-left ❚❚ pauses, saves and exits</span>
     </div>
     <div class="ctrl deskOnly">
       <b>W A S D</b><span>Move · Mouse: look (click to lock) · Wheel: zoom</span>
@@ -209,16 +239,18 @@
       <b>SPACE</b><span>Dodge Roll — roll through a hit for a Perfect Dodge (+50% damage for 2s)</span>
       <b>E</b><span>Shadow Rend — area blast around you</span>
       <b>F</b><span>Umbral Step — teleport behind an enemy and backstab (ignores blocks)</span>
-      <b>Q / G</b><span>Deploy shadows (costs mana) / Recall shadows</span>
+      <b>Q / G</b><span>Q pauses and lets you pick which shadows to deploy (costs mana) · G recalls shadows</span>
       <b>1</b><span>Dagger Tempest — throw a fan of piercing shadow daggers</span>
       <b>2</b><span>Night Sovereignty — empower and heal your whole army</span>
       <b>R</b><span>ARISE — raise fallen enemies as shadow soldiers</span>
       <b>V</b><span>Voice — say "Arise!", "Come out!" or "Return!"</span>
       <b>TAB</b><span>Shadow army roster</span>
+      <b>ESC</b><span>Pause menu — resume, or save &amp; exit</span>
     </div>
     <div id="saveInfo"></div>
     <div id="loadInfo">Loading character models…</div>
     <button id="startBtn" disabled>LOADING…</button><br>
+    <button class="small hidden" id="newRunBtn">Start a new run from Rift 1</button>
     <button class="small" id="resetBtn">Reset saved progress</button>
   </div>
 </div>
@@ -711,15 +743,24 @@ function recalcStats() {
   player.str = 12 + L * 0.6; player.speed = 7 + Math.min(2.5, L * 0.03);
   aura.intensity = 6 + Math.min(20, L * 0.2);
 }
-// On the field at once: up to 10 shadow soldiers (the limit grows with level) plus your one shadow boss.
+// On the field at once: up to 10 shadow soldiers (the limit grows with level) plus one shadow boss.
+// You can own any number of boss shadows; only one fights at a time.
 const MAX_DEPLOYED = 10;
 const armyLimit = () => Math.min(MAX_DEPLOYED, 3 + Math.floor(player.level / 3));
 const isBossEntry = a => TYPES[a.type].boss;
 const pDmg = () => player.str * (buffT > 0 ? 1.25 : 1) * (player.counterT > 0 ? 1.5 : 1);
 
 // ================================================================ save
+// The run in progress (which rift to continue from, and lives used) is saved alongside level and army.
+let savedRun = null;
+function runCheckpoint() {
+  if (livesLeft() <= 0) return null;
+  const next = riftState === 'cleared' ? rift + 1 : Math.max(1, rift);
+  return next > 1 || deaths ? { rift: next, deaths } : null;
+}
 function save() {
-  localStorage.setItem('shadowRiftSave', JSON.stringify({ level: player.level, seq: armyIdSeq, army: army.map(a => ({ id: a.id, type: a.type, name: a.name })) }));
+  if (playing) savedRun = runCheckpoint();
+  try { localStorage.setItem('shadowRiftSave', JSON.stringify({ level: player.level, seq: armyIdSeq, army: army.map(a => ({ id: a.id, type: a.type, name: a.name })), run: savedRun })); } catch (e) { /* storage unavailable */ }
 }
 function load() {
   try {
@@ -727,13 +768,18 @@ function load() {
     if (!s) return;
     player.level = s.level || 1; armyIdSeq = s.seq || 0;
     army = (s.army || []).filter(a => TYPES[a.type]).map(a => ({ ...a, status: 'stored', recover: 0 }));
-    // Older saves could hold several boss shadows: keep only the most recent one.
-    const bosses = army.filter(a => TYPES[a.type].boss);
-    if (bosses.length > 1) army = army.filter(a => !TYPES[a.type].boss || a === bosses[bosses.length - 1]);
+    savedRun = s.run || null;
   } catch (e) { /* corrupt save: start fresh */ }
 }
 function showSaveInfo() {
-  $('saveInfo').textContent = player.level > 1 || army.length ? `Saved progress: Level ${player.level} · ${army.length} shadow soldier${army.length === 1 ? '' : 's'}` : 'A new hunter awakens.';
+  $('saveInfo').textContent = player.level > 1 || army.length
+    ? `Saved progress: Level ${player.level} · ${army.length} shadow soldier${army.length === 1 ? '' : 's'}${hasContinue() ? ` · run paused at Rift ${savedRun.rift} (${MAX_LIVES - savedRun.deaths} lives left)` : ''}`
+    : 'A new hunter awakens.';
+}
+const hasContinue = () => !!savedRun && (savedRun.rift > 1 || savedRun.deaths > 0);
+function updateStartButtons() {
+  $('startBtn').textContent = hasContinue() ? `CONTINUE · RIFT ${savedRun.rift}` : 'ENTER THE RIFT';
+  $('newRunBtn').classList.toggle('hidden', !hasContinue());
 }
 
 // ================================================================ helpers
@@ -1163,21 +1209,11 @@ function resolveExtraction(c) {
     : T.boss ? Math.min(0.5, 0.18 + player.level * 0.0015) : c.elite ? 0.6 : 0.85;
   if (Math.random() < chance) {
     removeCorpse(c);
-    // You can command only one shadow boss: a new one replaces the old.
-    if (T.boss) {
-      const old = army.find(isBossEntry);
-      if (old) {
-        army.splice(army.indexOf(old), 1);
-        const u = activeBoss();
-        if (u) { u.alive = false; u.bar.remove(); clearAuras(u); ringFX(u.pos, 0x6d28d9, 3, 0.6); sinkAway(u, 0.8); }
-        notify(`<b>${old.name}</b> fades into the void to make room for a new shadow boss.`, 'gold');
-      }
-    }
     const entry = { id: ++armyIdSeq, type: c.type, name: pickName(c.type), status: 'stored', recover: 0 };
     army.push(entry);
     if (T.boss) bigText(entry.name.toUpperCase(), `${T.name} now serves you`);
     notify(`<b>${T.name}</b> has risen as your shadow: <b style="color:#c084fc">${entry.name}</b>`);
-    if (T.boss || activeSoldiers().length < armyLimit()) summonEntry(entry, c.pos);
+    if (T.boss ? !activeBoss() : activeSoldiers().length < armyLimit()) summonEntry(entry, c.pos);
     else notify(`${entry.name} rests in the shadow realm (Q to deploy).`);
     save();
   } else {
@@ -1210,20 +1246,124 @@ function deployArmy(free = false) {
   const canPlace = e => isBossEntry(e) ? bossSlot > 0 : slots > 0;
   if (!ready.some(canPlace)) { notify(armyLimit() >= MAX_DEPLOYED ? `Deployment limit reached: at most ${MAX_DEPLOYED} shadow soldiers and 1 shadow boss can fight at once.` : `Deployment limit reached (${armyLimit()} soldiers). It grows with your level, up to ${MAX_DEPLOYED}.`); return; }
   ready.sort((a, b) => RANK_IDX[TYPES[b.type].rank] - RANK_IDX[TYPES[a.type].rank]);
-  let n = 0, spent = 0, blocked = null, i = activeShadows().length;
+  let n = 0, spent = 0, blocked = null;
   for (const e of ready) {
     if (!canPlace(e)) continue;
     const cost = free ? 0 : DEPLOY_COST[TYPES[e.type].rank];
     if (player.mp < cost) { blocked = blocked || { e, cost }; continue; }
     player.mp -= cost; spent += cost;
-    const a = i * 2.39996, r = 3 + Math.sqrt(i) * 1.3;
-    summonEntry(e, player.pos.clone().add(new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r)));
+    placeShadow(e);
     if (isBossEntry(e)) bossSlot--; else slots--;
-    n++; i++;
+    n++;
   }
   if (n) { sfx('arise'); notify(`${n} shadow${n > 1 ? 's' : ''} answer your call${spent ? ` (−${spent} MP)` : ''}.`); }
   if (blocked) notify(`Not enough mana to deploy <b>${blocked.e.name}</b> (${blocked.cost} MP).`, 'red');
 }
+// Shadows rise in a spiral around you.
+function placeShadow(e) {
+  const i = activeShadows().length, a = i * 2.39996, r = 3 + Math.sqrt(i) * 1.3;
+  summonEntry(e, player.pos.clone().add(new THREE.Vector3(Math.cos(a) * r, 0, Math.sin(a) * r)));
+}
+
+// ================================================================ menus (deploy picker, pause)
+// Q opens the deploy picker and pauses the game; Esc (or the phone's ❚❚ button) opens the pause menu.
+let menuOpen = null, deploySel = new Set(), suppressLockPause = false, pauseOpenedAt = 0;
+function releaseMouse() { if (document.pointerLockElement) { suppressLockPause = true; document.exitPointerLock?.(); } }
+function openMenu(kind) {
+  menuOpen = kind; paused = true; mouseHeld = false; touchAttack = false;
+  for (const k in keys) keys[k] = false;
+  releaseMouse();
+}
+function closeMenu(relock = true) {
+  menuOpen = null; paused = false;
+  $('deployMenu').classList.add('hidden'); $('pauseMenu').classList.add('hidden');
+  if (relock) lockMouse();
+}
+function openDeployMenu() {
+  if (!playing || !player.alive || menuOpen) return;
+  if (!army.some(a => a.status === 'stored')) {
+    const rec = army.filter(a => a.status === 'recovering');
+    notify(rec.length ? `${rec.length} fallen shadow${rec.length > 1 ? 's are' : ' is'} still reforming.` : army.length ? 'All your shadows are already deployed.' : 'You have no shadows yet. Defeat foes and say "Arise".');
+    return;
+  }
+  deploySel = new Set();
+  openMenu('deploy');
+  $('deployMenu').classList.remove('hidden');
+  renderDeployMenu();
+}
+function deployPlan() {
+  const sel = army.filter(a => deploySel.has(a.id) && a.status === 'stored');
+  const soldiers = sel.filter(a => !isBossEntry(a)).length;
+  return { sel, soldiers, bosses: sel.length - soldiers, cost: sel.reduce((t, a) => t + DEPLOY_COST[TYPES[a.type].rank], 0),
+    slots: armyLimit() - activeSoldiers().length, bossSlot: activeBoss() ? 0 : 1 };
+}
+// Why a shadow can't be added to the selection right now ('' means it can).
+function blockReason(a, plan) {
+  if (a.status === 'active') return 'deployed';
+  if (a.status === 'recovering') return `reforming ${Math.ceil(a.recover)}s`;
+  if (isBossEntry(a) ? plan.bosses >= plan.bossSlot : plan.soldiers >= plan.slots) return isBossEntry(a) ? 'boss slot full' : 'soldier slots full';
+  if (plan.cost + DEPLOY_COST[TYPES[a.type].rank] > player.mp) return 'not enough MP';
+  return '';
+}
+function renderDeployMenu() {
+  const plan = deployPlan();
+  const order = [...army].sort((a, b) => (a.status !== 'stored') - (b.status !== 'stored') || isBossEntry(b) - isBossEntry(a) || RANK_IDX[TYPES[b.type].rank] - RANK_IDX[TYPES[a.type].rank]);
+  const rows = order.map(a => {
+    const T = TYPES[a.type], on = deploySel.has(a.id), why = on ? '' : blockReason(a, plan);
+    return `<tr data-id="${a.id}" class="${on ? 'sel' : why ? 'off' : 'pick'}"><td class="ck">${on ? '☑' : '☐'}</td><td><b>${a.name}</b>${isBossEntry(a) ? '<span class="bosstag">BOSS</span>' : ''}</td><td>${T.name}</td><td>${T.rank}</td><td>${DEPLOY_COST[T.rank]} MP</td><td>${on ? 'selected' : why || 'ready'}</td></tr>`;
+  }).join('');
+  const usedS = activeSoldiers().length + plan.soldiers, usedB = (activeBoss() ? 1 : 0) + plan.bosses;
+  $('deployMenu').innerHTML = `<h2>CALL YOUR SHADOWS</h2>
+    <div class="sub">Game paused · MP <b>${Math.floor(player.mp)}</b> / ${player.maxMp} · selected cost <b>${plan.cost} MP</b> · soldiers <b>${usedS}/${armyLimit()}</b> · boss <b>${usedB}/1</b></div>
+    <table><tr><th></th><th>Name</th><th>Origin</th><th>Rank</th><th>Cost</th><th>Status</th></tr>${rows}</table>
+    <div class="dm-btns"><button id="dmGo">${plan.sel.length ? `DEPLOY ${plan.sel.length} (−${plan.cost} MP)` : 'NOTHING SELECTED'}</button><button class="small" id="dmAuto">Auto-pick best</button><button class="small" id="dmClear">Clear</button><button class="small" id="dmCancel">Cancel</button></div>
+    <div class="sub" style="text-align:center">${IS_TOUCH ? 'Tap shadows to select them' : 'Click shadows to select them · Enter deploys · Q or Esc closes'}</div>`;
+}
+function autoPickDeploy() {
+  const order = army.filter(a => a.status === 'stored' && !deploySel.has(a.id)).sort((a, b) => isBossEntry(b) - isBossEntry(a) || RANK_IDX[TYPES[b.type].rank] - RANK_IDX[TYPES[a.type].rank]);
+  for (const a of order) if (!blockReason(a, deployPlan())) deploySel.add(a.id);
+}
+function deploySelected() {
+  const plan = deployPlan();
+  closeMenu();
+  if (!plan.sel.length) return;
+  for (const e of plan.sel) { player.mp -= DEPLOY_COST[TYPES[e.type].rank]; placeShadow(e); }
+  sfx('arise');
+  notify(`${plan.sel.length} shadow${plan.sel.length > 1 ? 's' : ''} answer your call (−${plan.cost} MP).`);
+}
+$('deployMenu').addEventListener('click', e => {
+  const id = e.target.id;
+  if (id === 'dmGo') return deploySelected();
+  if (id === 'dmCancel') return closeMenu();
+  if (id === 'dmAuto') autoPickDeploy();
+  else if (id === 'dmClear') deploySel.clear();
+  else {
+    const row = e.target.closest('tr[data-id]'); if (!row) return;
+    const a = army.find(x => x.id === +row.dataset.id); if (!a) return;
+    if (deploySel.has(a.id)) deploySel.delete(a.id);
+    else if (!blockReason(a, deployPlan())) deploySel.add(a.id);
+  }
+  renderDeployMenu();
+});
+function openPauseMenu() {
+  if (!playing || !player.alive || menuOpen) return;
+  openMenu('pause'); pauseOpenedAt = performance.now();
+  $('pauseInfo').textContent = `Rift ${Math.max(1, rift)} · Level ${player.level} · ${army.length} shadows · ${livesLeft()} ${livesLeft() === 1 ? 'life' : 'lives'} left`;
+  $('pauseMenu').classList.remove('hidden');
+}
+function saveAndExit() {
+  save();                // remembers level, army and the rift to continue from
+  closeMenu(false);
+  clearField();
+  playing = false; paused = false;
+  for (const id of ['hud', 'pbar', 'touch', 'army']) $(id).classList.add('hidden');
+  releaseMouse();
+  $('start').classList.remove('hidden');
+  showSaveInfo(); updateStartButtons();
+}
+$('resumeBtn').onclick = () => closeMenu();
+$('saveExitBtn').onclick = saveAndExit;
+
 function recallArmy() {
   if (!playing || !player.alive) return;
   const act = activeShadows();
@@ -1499,7 +1639,7 @@ function playerDie() {
   later(2, () => {
     $('overInfo').textContent = `Reached Rift ${rift} · Level ${player.level} · ${army.length} shadows in your army · all ${MAX_LIVES} lives used`;
     $('over').classList.remove('hidden');
-    document.exitPointerLock?.();
+    releaseMouse();
   });
 }
 function revive() {
@@ -2155,6 +2295,7 @@ function riftPlan(n) {
 function startRift(n) {
   rift = n;
   snapshotRift();
+  save();
   const plan = riftPlan(n);
   spawnQueue = plan.wave; bossQueue = plan.bosses;
   spawnT = 1.2; riftState = 'fighting';
@@ -2238,7 +2379,7 @@ function toggleVoice() {
 // ================================================================ input
 const KEYMAP = {
   KeyR: arise, KeyE: shadowRend, KeyF: umbralStep, Digit1: daggerTempest, Digit2: nightSovereignty,
-  ShiftLeft: dash, ShiftRight: dash, Space: dodge, KeyQ: () => deployArmy(), KeyG: recallArmy, KeyV: toggleVoice,
+  ShiftLeft: dash, ShiftRight: dash, Space: dodge, KeyQ: openDeployMenu, KeyG: recallArmy, KeyV: toggleVoice,
 };
 addEventListener('keydown', e => {
   if (e.code === 'Tab') { e.preventDefault(); if (playing) toggleArmyPanel(); return; }
@@ -2246,13 +2387,20 @@ addEventListener('keydown', e => {
   keys[e.code] = true;
   if (!playing) return;
   initAudio();
+  if (menuOpen) {
+    if (e.code === 'Escape') { if (menuOpen === 'pause' && performance.now() - pauseOpenedAt < 400) return; closeMenu(); }
+    else if (menuOpen === 'deploy' && e.code === 'KeyQ') closeMenu();
+    else if (menuOpen === 'deploy' && (e.code === 'Enter' || e.code === 'NumpadEnter')) deploySelected();
+    return;
+  }
+  if (e.code === 'Escape') { openPauseMenu(); return; }
   if (e.code === 'KeyP') { paused = !paused; bigText(paused ? 'PAUSED' : ''); return; }
   KEYMAP[e.code]?.();
 });
 addEventListener('keyup', e => { keys[e.code] = false; });
 addEventListener('blur', () => { for (const k in keys) keys[k] = false; mouseHeld = false; });
 canvas.addEventListener('mousedown', e => {
-  if (!playing || IS_TOUCH) return;
+  if (!playing || IS_TOUCH || menuOpen) return;
   initAudio();
   if (document.pointerLockElement !== canvas) { lockMouse(); return; }
   if (e.button === 0) { mouseHeld = true; playerAttack(); }
@@ -2264,7 +2412,13 @@ addEventListener('mousemove', e => {
   pitch = Math.max(0.08, Math.min(1.2, pitch + e.movementY * 0.0025));
 });
 addEventListener('wheel', e => { camDist = Math.max(5, Math.min(22, camDist + e.deltaY * 0.01)); });
-document.addEventListener('pointerlockchange', () => { $('lockHint').style.opacity = document.pointerLockElement === canvas ? 0.4 : 1; });
+document.addEventListener('pointerlockchange', () => {
+  $('lockHint').style.opacity = document.pointerLockElement === canvas ? 0.4 : 1;
+  if (document.pointerLockElement) return;
+  // Esc while the mouse is locked only releases the lock in most browsers, so treat that as "pause".
+  if (suppressLockPause) { suppressLockPause = false; return; }
+  if (playing && !menuOpen && player.alive && !IS_TOUCH) openPauseMenu();
+});
 
 function lockMouse() { if (IS_TOUCH) return; try { canvas.requestPointerLock?.()?.catch?.(() => {}); } catch (e) { /* pointer lock unavailable */ } }
 function toggleArmyPanel() {
@@ -2280,7 +2434,7 @@ function renderArmyPanel() {
     else st = 'ready';
     return `<tr><td><b>${a.name}</b></td><td>${T.name}</td><td>${T.rank}</td><td>${DEPLOY_COST[T.rank]} MP</td><td class="st-${a.status}">${st}</td></tr>`;
   }).join('');
-  $('army').innerHTML = `<h2>SHADOW ARMY</h2><div class="sub">${army.length} soldiers · can deploy ${armyLimit()} soldiers at once (grows with level, max ${MAX_DEPLOYED}) plus your one shadow boss · Q deploys ready shadows for mana · fallen shadows must reform before they can be deployed again</div>
+  $('army').innerHTML = `<h2>SHADOW ARMY</h2><div class="sub">${army.length} soldiers · can deploy ${armyLimit()} soldiers at once (grows with level, max ${MAX_DEPLOYED}) plus one shadow boss (you can own several) · Q pauses so you can pick who to deploy · fallen shadows must reform before they can be deployed again</div>
     ${army.length ? `<table><tr><th>Name</th><th>Origin</th><th>Rank</th><th>Deploy</th><th>Status</th></tr>${rows}</table>` : '<p>No shadows yet. Defeat an enemy and press <b>R</b> or say <b>"Arise"</b> near its body.</p>'}`;
 }
 
@@ -2309,8 +2463,8 @@ function setupTouch() {
 
   const ACTIONS = {
     dash, dodge, rend: shadowRend, step: umbralStep, tempest: daggerTempest, sov: nightSovereignty, arise,
-    deploy: () => deployArmy(), recall: recallArmy, army: toggleArmyPanel, voice: toggleVoice,
-    pause: () => { if (playing) { paused = !paused; bigText(paused ? 'PAUSED' : ''); } },
+    deploy: openDeployMenu, recall: recallArmy, army: toggleArmyPanel, voice: toggleVoice,
+    menu: () => (menuOpen ? closeMenu() : openPauseMenu()),
   };
   for (const b of document.querySelectorAll('#touch [data-act]')) {
     const act = b.dataset.act;
@@ -2405,25 +2559,27 @@ function clearField() {
   units = []; corpses = []; projectiles = []; timers = []; telegraphs = [];
   for (const a of army) if (a.status === 'active') a.status = 'stored';
 }
-function beginRun() {
+function beginRun(cont = null) {
   clearField();
   recalcStats();
   player.alive = true; player.hp = player.maxHp; player.mp = player.maxMp; player.kb = null; player.slowT = 0; player.sinceHit = 0; player.regenOn = false;
   player.pos.set(0, 0, 0); player.rig.body.rotation.set(0, 0, 0);
   for (const k in cds) cds[k] = 0;
-  buffT = 0; deaths = 0; riftSnap = null; resetPlayerPose();
-  rift = 0; riftState = 'start'; interT = 4; spawnQueue = [];
+  buffT = 0; deaths = cont ? cont.deaths : 0; riftSnap = null; resetPlayerPose();
+  rift = cont ? cont.rift - 1 : 0; riftState = 'start'; interT = 4; spawnQueue = [];
+  menuOpen = null;
   playing = true; paused = false;
   $('hud').classList.remove('hidden'); $('pbar').classList.remove('hidden');
   if (IS_TOUCH) $('touch').classList.remove('hidden');
   if (army.length) later(0.5, () => deployArmy(true));
   notify(`Welcome, Hunter. Level ${player.level}. The rifts will not be kind.`);
 }
-$('startBtn').onclick = () => { initAudio(); goFullscreen(); $('start').classList.add('hidden'); beginRun(); lockMouse(); };
+$('startBtn').onclick = () => { initAudio(); goFullscreen(); $('start').classList.add('hidden'); beginRun(hasContinue() ? savedRun : null); lockMouse(); };
+$('newRunBtn').onclick = () => { savedRun = null; save(); initAudio(); goFullscreen(); $('start').classList.add('hidden'); beginRun(); lockMouse(); };
 $('againBtn').onclick = () => { goFullscreen(); $('over').classList.add('hidden'); beginRun(); lockMouse(); };
 $('resetBtn').onclick = () => {
   if (!confirm('Erase your level and shadow army?')) return;
-  localStorage.removeItem('shadowRiftSave'); player.level = 1; army = []; armyIdSeq = 0; recalcStats(); showSaveInfo();
+  localStorage.removeItem('shadowRiftSave'); player.level = 1; army = []; armyIdSeq = 0; savedRun = null; recalcStats(); showSaveInfo(); updateStartButtons();
 };
 
 // ================================================================ render loop
@@ -2484,10 +2640,10 @@ function updateHUD() {
   $('limit').textContent = armyLimit();
   $('recc').textContent = army.filter(a => a.status === 'recovering').length;
   $('buff').textContent = [buffT > 0 ? `✦ Night Sovereignty — ${Math.ceil(buffT)}s` : '', player.slowT > 0 ? '❄ Slowed' : '', player.regenOn ? '✚ Regenerating' : player.hp < player.maxHp && player.alive ? `✚ Regen in ${Math.ceil(REGEN_DELAY - player.sinceHit)}s` : ''].filter(Boolean).join(' · ');
-  $('riftName').textContent = rift ? `RIFT ${rift} · ${rift % 5 === 0 ? 'BOSS GATE' : rankOf(rift) + '-RANK'}` : 'PREPARING';
+  $('riftName').textContent = rift && riftState !== 'start' ? `RIFT ${rift} · ${rift % 5 === 0 ? 'BOSS GATE' : rankOf(rift) + '-RANK'}` : 'PREPARING';
   $('riftInfo').textContent = riftState === 'boss' ? (bossQueue.length ? `Boss arriving: ${TYPES[bossQueue[0]].name}` : `Defeat the boss · ${enemiesAlive.length} enemies`)
     : riftState === 'fighting' ? `Enemies remaining: ${spawnQueue.length + enemiesAlive.length} · then the boss`
-    : riftState === 'cleared' ? `Next rift opens in ${Math.ceil(interT)}s` : `First rift opens in ${Math.ceil(Math.max(0, interT))}s`;
+    : riftState === 'cleared' ? `Next rift opens in ${Math.ceil(interT)}s` : `Rift ${rift + 1} opens in ${Math.ceil(Math.max(0, interT))}s`;
   const ap = armyPower();
   if (ap.n) $('riftInfo').textContent += ` · Army threat: enemies +${Math.round((ap.hp - 1) * 100)}% HP, +${Math.round((ap.dmg - 1) * 100)}% dmg`;
   for (const [id, a] of Object.entries(AB)) {
@@ -2588,7 +2744,7 @@ async function boot() {
   setupPlayerRig();
   guard('touch', setupTouch);
   guard('prewarm', prewarmShaders);
-  $('startBtn').disabled = false; $('startBtn').textContent = 'ENTER THE RIFT';
+  $('startBtn').disabled = false; updateStartButtons();
 }
 // Render every character (enemy and shadow versions, plus an elite) once behind the start screen,
 // so shaders compile now instead of causing a hitch the first time each enemy appears mid-fight.
