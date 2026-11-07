@@ -758,9 +758,13 @@ function runCheckpoint() {
   const next = riftState === 'cleared' ? rift + 1 : Math.max(1, rift);
   return next > 1 || deaths ? { rift: next, deaths } : null;
 }
+// While a rift is in progress, shadows raised in it aren't kept yet: the save holds the army
+// you entered the rift with, and only a cleared rift locks in the new shadows.
+const riftInProgress = () => playing && !!riftSnap && (riftState === 'fighting' || riftState === 'boss');
 function save() {
   if (playing) savedRun = runCheckpoint();
-  try { localStorage.setItem('shadowRiftSave', JSON.stringify({ level: player.level, seq: armyIdSeq, army: army.map(a => ({ id: a.id, type: a.type, name: a.name })), run: savedRun })); } catch (e) { /* storage unavailable */ }
+  const list = riftInProgress() ? riftSnap.army : army;
+  try { localStorage.setItem('shadowRiftSave', JSON.stringify({ level: player.level, seq: armyIdSeq, army: list.map(a => ({ id: a.id, type: a.type, name: a.name })), run: savedRun })); } catch (e) { /* storage unavailable */ }
 }
 function load() {
   try {
@@ -1352,7 +1356,8 @@ function openPauseMenu() {
   $('pauseMenu').classList.remove('hidden');
 }
 function saveAndExit() {
-  save();                // remembers level, army and the rift to continue from
+  save();                // remembers level, the army you entered this rift with, and the rift to continue from
+  if (riftInProgress()) army = riftSnap.army.map(a => ({ ...a, status: 'stored', recover: 0 }));
   closeMenu(false);
   clearField();
   playing = false; paused = false;
