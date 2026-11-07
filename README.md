@@ -7,6 +7,7 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 ## How it plays
 
 - **Every kill gives you a level.** Your HP, mana, strength and army size grow as you fight. Each level adds 20 max HP.
+- **The rifts grow with you.** Enemy HP keeps pace with your strength and their damage with your level, so leveling up never makes fights easy. Regular enemies sit a few levels below you, guardians just above you, and major bosses 5+ levels above. Each later rift adds more on top.
 - **Dodge.** Press **Space** (or the Dodge button on a phone) to roll. It covers less ground than a dash but keeps you invulnerable longer. Rolling through an attack is a **Perfect Dodge** and gives +50% damage for 2 seconds.
 - **Three lives per run.** When you fall:
   - You lose levels: everything gained in that rift, plus 10% (at least 2).

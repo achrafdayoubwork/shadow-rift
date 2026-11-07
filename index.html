@@ -971,6 +971,18 @@ function armyPower() {
   return { n, hp: 1 + 0.05 * n, dmg: 1 + 0.025 * n };
 }
 
+// How strong you are compared to a level-1 hunter. Enemy stats are scaled by this.
+function levelPower() {
+  return { L: Math.max(0, player.level - 1), str: (12 + player.level * 0.6) / 12.6 };
+}
+// Enemy levels sit around yours: regular foes a little below, guardians just above, major bosses well above.
+function enemyLevel(T) {
+  const L = player.level;
+  if (T.guardian) return L + 2 + Math.floor(rift / 4);
+  if (T.boss) return L + 5 + Math.floor(rift / 5) * 2;
+  return Math.max(1, L - 3 + RANK_IDX[T.rank]);
+}
+
 function spawnUnit(type, team, pos, extra = {}) {
   const T = TYPES[type], rig = buildRig(type, team === 'shadow');
   rig.root.position.copy(pos); rig.root.position.y = 0;
@@ -979,9 +991,12 @@ function spawnUnit(type, team, pos, extra = {}) {
   let hpMul, dmgMul;
   if (team === 'enemy') {
     // Bosses grow much faster from rift to rift than regular enemies.
-    if (T.guardian) { hpMul = 1 + 0.9 * (rift - 1); dmgMul = 1 + 0.3 * (rift - 1); }
-    else if (T.boss) { const cyc = Math.max(1, Math.floor(rift / 5)); hpMul = 1 + 1.0 * (cyc - 1); dmgMul = 1 + 0.35 * (cyc - 1); }
-    else { hpMul = 1 + 0.6 * (rift - 1); dmgMul = 1 + 0.22 * (rift - 1); }
+    // Enemies are built around YOUR level: their HP grows with your strength and their
+    // damage with your level, then each later rift adds more on top.
+    const lv = levelPower(), r = Math.max(0, rift - 1);
+    if (T.guardian) { hpMul = lv.str * (1 + 0.15 * r); dmgMul = (1 + 0.035 * lv.L) * (1 + 0.05 * r); }
+    else if (T.boss) { const cyc = Math.max(1, Math.floor(rift / 5)); hpMul = (0.5 + 0.5 * lv.str) * (1 + 0.3 * (cyc - 1)); dmgMul = (1 + 0.025 * lv.L) * (1 + 0.1 * (cyc - 1)); }
+    else { hpMul = lv.str * (1 + 0.08 * r); dmgMul = (1 + 0.025 * lv.L) * (1 + 0.05 * r); }
     if (extra.elite) { hpMul *= 2.2; dmgMul *= 1.4; }
     // The bigger your shadow army, the stronger the rift's enemies become.
     const ap = armyPower(); hpMul *= ap.hp; dmgMul *= ap.dmg;
@@ -994,7 +1009,7 @@ function spawnUnit(type, team, pos, extra = {}) {
   const u = {
     type, team, rig, root: rig.root, pos: rig.root.position, maxHp: T.hp * hpMul, hp: T.hp * hpMul, dmg: T.dmg * dmgMul,
     speed: T.speed * (team === 'shadow' ? 1.15 : 1), range: T.range, cd: T.cd * (1 - 0.25 * bossLate), radius: T.radius, armor: (T.armor || 0) + (extra.elite ? 0.1 : 0) + 0.2 * bossLate,
-    lvl: team === 'enemy' ? rift * 2 + RANK_IDX[T.rank] * 2 : player.level,
+    lvl: team === 'enemy' ? enemyLevel(T) : player.level,
     atkCd: Math.random(), attackT: 0, walkT: 0, seed: Math.random() * 10, moving: false, curSpeed: 0, alive: true, rising: 0, stun: 0,
     kb: null, pending: null, windup: null, charge: null, lungeCd: 2, atkCount: 0, ...extra,
   };
