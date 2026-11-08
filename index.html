@@ -224,7 +224,7 @@
 <div id="start" class="overlay">
   <div class="card panel">
     <h1>SHADOW RIFT</h1>
-    <div class="tag">EVERY KILL MAKES YOU STRONGER · EVERY FOE CAN SERVE YOU</div>
+    <div class="tag">EVERY BOSS MAKES YOU STRONGER · EVERY FOE CAN SERVE YOU</div>
     <div class="ctrl touchOnly">
       <b>Left side</b><span>Drag to move</span>
       <b>Right side</b><span>Drag to look around</span>
@@ -746,7 +746,7 @@ function recalcStats() {
 // On the field at once: up to 10 shadow soldiers (the limit grows with level) plus one shadow boss.
 // You can own any number of boss shadows; only one fights at a time.
 const MAX_DEPLOYED = 10;
-const armyLimit = () => Math.min(MAX_DEPLOYED, 3 + Math.floor(player.level / 3));
+const armyLimit = () => Math.min(MAX_DEPLOYED, 3 + Math.floor(player.level / 2));
 const isBossEntry = a => TYPES[a.type].boss;
 const pDmg = () => player.str * (buffT > 0 ? 1.25 : 1) * (player.counterT > 0 ? 1.5 : 1);
 
@@ -1050,6 +1050,8 @@ function spawnUnit(type, team, pos, extra = {}) {
     if (extra.elite) { hpMul *= 2.2; dmgMul *= 1.4; }
     // The bigger your shadow army, the stronger the rift's enemies become.
     const ap = armyPower(); hpMul *= ap.hp; dmgMul *= ap.dmg;
+    // The very first boss (Rift 1) is a gentle introduction: much less HP and damage.
+    if (T.guardian && rift <= 1) { hpMul *= 0.15; dmgMul *= 0.55; extra = { ...extra, easy: true, armor: 0.1 }; }
   } else {
     hpMul = (1 + 0.035 * player.level) * (T.boss ? 0.3 : 1);
     dmgMul = 1 + 0.035 * player.level;
@@ -1140,12 +1142,15 @@ function killUnit(u, src) {
     scene.add(marker); u.marker = marker;
     corpses.push(u);
     player.mp = Math.min(player.maxMp, player.mp + 2);
+    // You only level up by defeating bosses: 3 levels for a guardian, 5 for a major boss.
     if (T.boss) {
-      bigText('BOSS DEFEATED', `${T.name} has fallen — try to make it rise`);
+      const gain = T.guardian ? BOSS_LEVELS.guardian : BOSS_LEVELS.major;
+      bigText('BOSS DEFEATED', `${T.name} has fallen · +${gain} levels — try to make it rise`);
       shake(0.8);
-      for (let i = 0; i < 2; i++) later(0.3 * (i + 1), () => levelUp(T.name + ' (bonus)', null, true));
+      const by = src && !src.isPlayer && src.name ? ` (by ${src.name})` : '';
+      notify(`<b>${T.name}</b> defeated${by} · <span style="color:#93c5fd">+${gain} levels → Lv. ${player.level + gain}</span>`, 'gold');
+      for (let i = 0; i < gain; i++) later(0.3 * i, () => levelUp(T.name, src, true));
     }
-    levelUp(u.elite ? 'Elite ' + T.name : T.name, src);
   } else {
     const entry = army.find(a => a.id === u.armyId);
     if (entry) {
@@ -1162,6 +1167,7 @@ function sinkAway(u, dur = 0.9) {
   effects.push({ obj: root, life: dur, max: dur, update: (e, k) => { root.position.y = -k * TYPES[u.type].h; } });
 }
 
+const BOSS_LEVELS = { guardian: 3, major: 5 };
 function levelUp(killedName, src, quiet = false) {
   player.level++;
   recalcStats();
@@ -1618,7 +1624,7 @@ function rollbackDeath() {
   if (!riftSnap) return { levels: 0, shadows: 0 };
   const before = player.level, kept = new Set(riftSnap.army.map(a => a.id));
   const lostShadows = army.filter(a => !kept.has(a.id)).length;
-  const penalty = Math.max(2, Math.floor(riftSnap.level * 0.1));
+  const penalty = Math.max(1, Math.floor(riftSnap.level * 0.1));
   player.level = Math.max(1, Math.min(player.level, riftSnap.level) - penalty);
   army = riftSnap.army.map(a => ({ ...a, status: 'stored', recover: 0 }));
   recalcStats(); save();
@@ -1876,11 +1882,11 @@ function guardianAI(u, tg, d, dt) {
 
   if (u.type === 'warchief') {
     // Calls in goblin reinforcements, enrages nearby allies, and lobs fire bombs that leave burning ground.
-    if (enemy) for (const th of [0.7, 0.4]) if (frac < th && !ai['sum' + th]) {
+    if (enemy && !u.easy) for (const th of [0.7, 0.4]) if (frac < th && !ai['sum' + th]) {
       ai['sum' + th] = true; summonMinions(u, ['goblin', 'goblin', 'goblin', 'goblin', th < 0.5 ? 'orc' : 'goblin']);
       bigText('TO ARMS!', 'The Warchief calls his horde'); sfx('roar');
     }
-    if (enemy && frac < 0.3 && ai.phase < 2) { ai.phase = 2; u.rageT = 1e9; bigText('BLOODLUST', 'The Warchief is permanently enraged'); sfx('roar'); shake(0.5); }
+    if (enemy && !u.easy && frac < 0.3 && ai.phase < 2) { ai.phase = 2; u.rageT = 1e9; bigText('BLOODLUST', 'The Warchief is permanently enraged'); sfx('roar'); shake(0.5); }
     if (!tg) return false;
     if (tick('cryT', 5)) { ai.cryT = 12; warCry(u); u.windup = { t: 0.6, fn: () => { u.attackT = 1; } }; return true; }
     if (tick('bombT', 3) && d < 22) {
@@ -2080,6 +2086,7 @@ function guardianAI(u, tg, d, dt) {
 
 // Every enemy boss: Last Stand below 20% HP, and a hard enrage if the fight drags on.
 function bossPressure(u, T, dt) {
+  if (u.easy) return; // no Last Stand or enrage timer for the first boss
   const ai = u.ai;
   if (u.hp / u.maxHp < 0.2 && !u.lastStand) {
     u.lastStand = true;
@@ -2119,7 +2126,7 @@ function updateUnit(u, dt) {
   if (u.team === 'enemy') {
     u.sinceHit = (u.sinceHit || 0) + dt;
     // Bosses wait longer (8s) and heal slowly (0.5%/s).
-    if (u.sinceHit > (T.boss ? 8 : 4) && u.hp < u.maxHp) u.hp = Math.min(u.maxHp, u.hp + u.maxHp * (T.boss ? 0.005 : 0.03) * dt);
+    if (!u.easy && u.sinceHit > (T.boss ? 8 : 4) && u.hp < u.maxHp) u.hp = Math.min(u.maxHp, u.hp + u.maxHp * (T.boss ? 0.005 : 0.03) * dt);
     if (T.boss && u.ai) bossPressure(u, T, dt);
     // After being stunned, a boss shrugs off stuns for 8 seconds.
     if (T.boss) {

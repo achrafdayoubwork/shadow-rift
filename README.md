@@ -6,11 +6,11 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 
 ## How it plays
 
-- **Every kill gives you a level.** Your HP, mana, strength and army size grow as you fight. Each level adds 20 max HP.
+- **Bosses make you stronger.** You only level up by defeating bosses: **+3 levels** for a Rift Guardian and **+5** for a major boss. Regular enemies give no levels. Each level adds 20 max HP and more strength and mana, and the soldier deploy limit grows by 1 every 2 levels.
 - **The rifts grow with you.** Enemy HP keeps pace with your strength and their damage with your level, so leveling up never makes fights easy. Regular enemies sit a few levels below you, guardians just above you, and major bosses 5+ levels above. Each later rift adds more on top.
 - **Dodge.** Press **Space** (or the Dodge button on a phone) to roll. It covers less ground than a dash but keeps you invulnerable longer. Rolling through an attack is a **Perfect Dodge** and gives +50% damage for 2 seconds.
 - **Three lives per run.** When you fall:
-  - You lose levels: everything gained in that rift, plus 10% (at least 2).
+  - You lose levels: everything gained in that rift, plus 10% (at least 1).
   - Every shadow you raised during that rift is lost. You keep the army you had when the rift opened.
   - You revive with full HP but **0 MP**, and all your shadows wait in reserve until you deploy them.
   - The same rift then restarts after 8 seconds.
@@ -27,6 +27,7 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 - **Clear the rifts.** Waves of goblins, dire wolves, orc brutes, warlocks and armored knights come through rift portals. **Every rift ends with a boss.** Bosses have phases, and their big attacks show a red warning zone on the ground before they hit.
   - **Every 5th rift** ends with a major boss: the Rift Colossus, the Bloodfang Alpha, the Ashen Lich or the **Void Tyrant**.
     - **Void Tyrant:** spinning cross-shaped void beams, gravity wells that drag you in before they explode, shadow-step strikes from behind below half HP, and below 25% an Event Horizon that blasts everything except the area close to it.
+  - **The first boss** (end of Rift 1) is an easy introduction: much less HP and damage, no reinforcements, no Last Stand or enrage, and it doesn't heal.
   - **Every other rift** ends with a Rift Guardian:
     - **Goblin Warchief:** a war cry that enrages nearby enemies, fire bombs that leave burning ground, goblin reinforcements, and permanent bloodlust below 30% HP.
     - **Brood Mother:** venom spit that leaves poison pools, waves of hatchlings, and below half HP it burrows and erupts beneath you.
