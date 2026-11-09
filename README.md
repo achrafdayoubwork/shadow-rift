@@ -8,6 +8,11 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 
 - **Bosses make you stronger.** You only level up by defeating bosses: **+3 levels** for a Rift Guardian and **+5** for a major boss. Regular enemies give no levels. Each level adds 20 max HP and more strength and mana, and the soldier deploy limit grows by 1 every 2 levels.
 - **The rifts grow with you.** Enemy HP keeps pace with your strength and their damage with your level, so leveling up never makes fights easy. Regular enemies sit a few levels below you, guardians just above you, and major bosses 5+ levels above. Each later rift adds more on top.
+- **Combos.** Every hit you land builds a combo (NICE → GREAT → BRUTAL → SAVAGE → SOVEREIGN) worth +1% damage per hit, up to +25%. Stop hitting and it fades; get hit and it is cut in half.
+- **Monarch's Domain (X).** Fighting fills your **Shadow Gauge** (SG bar): hits, crits, kills, Perfect Dodges and especially boss kills. When it is full, press **X** (or DOMAIN on a phone): time slows, a shockwave blasts and stuns nearby enemies, all enemies move at under half speed for 8 seconds, you deal +50% damage and your shadows are healed and empowered.
+- **Boons.** After every boss you choose 1 of 3 boons that last for the rest of the run, such as Bloodthirst (kills heal you), Keen Edge (more crits), Legion (more shadow slots), Phantom Edge (Perfect Dodges reset your dash and blast enemies), Executioner, Twin Tempest, Umbral Thorns, Frenzy and more. Some can be taken several times. Every run builds differently.
+- **Orbs.** Enemies sometimes drop green health orbs and blue mana orbs, and bosses drop a shower of them. Walk near them and they fly to you.
+- **Big moments.** Boss kills play out in slow motion, and critical hits land with a split-second impact pause.
 - **Dodge.** Press **Space** (or the Dodge button on a phone) to roll. It covers less ground than a dash but keeps you invulnerable longer. Rolling through an attack is a **Perfect Dodge** and gives +50% damage for 2 seconds.
 - **Three lives per run.** When you fall:
   - You lose levels: everything gained in that rift, plus 10% (at least 1).
@@ -58,6 +63,8 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 | G | Recall shadows |
 | Shift | Dash (invulnerable while dashing) |
 | Space | Dodge roll (Perfect Dodge: +50% damage for 2 s) |
+| X | Monarch's Domain (when the Shadow Gauge is full) |
+| 1 / 2 / 3 | Pick a boon card (after a boss) |
 | E | Shadow Rend: area blast |
 | F | Umbral Step: teleport behind an enemy and backstab |
 | 1 | Dagger Tempest: piercing dagger fan |
@@ -75,7 +82,7 @@ Open the same link on your phone and turn it sideways. On-screen touch controls 
 - **Left side:** drag to move (joystick)
 - **Right side:** drag to look around; pinch to zoom
 - **⚔ button:** hold to attack. Attacks aim at the nearest enemy automatically.
-- **Button ring:** **Deploy** (right next to ⚔), Dash, Dodge, Shadow Rend, Umbral Step, Daggers, Sovereign and **ARISE**
+- **Button ring:** **Deploy** (right next to ⚔), **DOMAIN** (ultimate), Dash, Dodge, Shadow Rend, Umbral Step, Daggers, Sovereign and **ARISE**
 - **Top-left ❚❚:** pause menu (resume, or save & exit)
 - **Top row:** Recall, Army roster and Voice ("Arise!")
 

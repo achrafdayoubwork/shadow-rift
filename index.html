@@ -24,6 +24,36 @@
   .bar > div { height: 100%; width: 100%; transition: width .12s; }
   #hpf { background: linear-gradient(90deg, #991b1b, #ef4444); }
   #mpf { background: linear-gradient(90deg, #3730a3, #818cf8); }
+  #sgf { background: linear-gradient(90deg, #2e1065, #a855f7, #f0abfc); }
+  #sgf.full { animation: sgpulse .6s infinite alternate; }
+  @keyframes sgpulse { from { filter: brightness(1); box-shadow: 0 0 4px #a855f7; } to { filter: brightness(1.6); box-shadow: 0 0 14px #e879f9; } }
+  #boonsRow { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px; }
+  #boonsRow span { font-size: 10px; padding: 1px 5px; border-radius: 4px; background: rgba(139, 92, 246, .22); border: 1px solid rgba(167, 139, 250, .35); color: #e9d5ff; }
+  #combo { position: fixed; right: 36px; top: 38%; text-align: right; pointer-events: none; transition: opacity .25s; }
+  #combo b { display: block; font-size: 58px; font-weight: 900; line-height: 1; color: #f5f3ff; text-shadow: 0 0 18px #a855f7, 0 2px 0 #3b0764; }
+  #combo span { font-size: 13px; letter-spacing: 5px; color: #d8b4fe; font-weight: 800; }
+  #combo i { display: block; font-style: normal; font-size: 11px; color: #c4b5fd; letter-spacing: 1px; }
+  #combo.pop b { animation: cpop .18s ease-out; }
+  @keyframes cpop { from { transform: scale(1.35); } to { transform: scale(1); } }
+  #combo.hidden { opacity: 0; display: block !important; }
+  #domainFx { position: fixed; inset: 0; pointer-events: none; opacity: 0; transition: opacity .4s; box-shadow: inset 0 0 260px rgba(126, 34, 206, .95); background: radial-gradient(circle, transparent 55%, rgba(46, 16, 101, .35)); }
+  #domainFx.on { opacity: 1; }
+  #c-ult.ready { border-color: #e879f9; box-shadow: 0 0 18px #c026d3; color: #fff; }
+  #tb-ult { background: radial-gradient(circle, #a21caf, #2e1065); }
+  #tb-ult.ready { box-shadow: 0 0 22px #e879f9; border-color: #f5d0fe; }
+  #boonMenu .card { max-width: 900px; }
+  #boonCards { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
+  .boon { width: 230px; padding: 16px 14px; border: 1px solid rgba(167, 139, 250, .45); border-radius: 12px; background: linear-gradient(180deg, rgba(76, 29, 149, .55), rgba(17, 10, 34, .9)); cursor: pointer; text-align: left; transition: transform .12s, box-shadow .12s; }
+  .boon:hover { transform: translateY(-4px); box-shadow: 0 0 22px #a855f7; }
+  .boon .ic { font-size: 30px; }
+  .boon h3 { margin: 6px 0 4px; font-size: 16px; letter-spacing: 1px; color: #f5f3ff; }
+  .boon p { margin: 0; font-size: 12.5px; color: #c4b5fd; line-height: 1.4; }
+  .boon .st { margin-top: 8px; font-size: 11px; color: #a78bfa; }
+  .boon .k { float: right; font-size: 11px; color: #a78bfa; border: 1px solid #6d28d9; border-radius: 4px; padding: 0 5px; }
+  body.touch #combo { right: 200px; top: 26%; }
+  body.touch #combo b { font-size: 38px; }
+  body.touch .boon { width: 30vw; padding: 10px; }
+  body.touch .boon p { font-size: 11px; }
   .row .val { width: 84px; text-align: right; color: #eee; font-weight: 600; }
   .stats { font-size: 12px; color: #a99bd6; margin-top: 6px; line-height: 1.6; }
   .stats b { color: #fff; }
@@ -173,6 +203,7 @@
 <body>
 <div id="labels"><div id="pbar" class="hidden"><div class="pn"></div><div class="pb"><i></i></div><div class="ph"></div></div></div>
 <div id="flash"></div>
+<div id="domainFx"></div>
 <div id="lowhp"></div>
 
 <div id="hud" class="hidden">
@@ -181,12 +212,15 @@
     <div class="lvl">LEVEL <b id="lvl">1</b> <span id="lives" title="Lives left this run"></span></div>
     <div class="row"><span class="lbl">HP</span><div class="bar"><div id="hpf"></div></div><span class="val" id="hpt"></span></div>
     <div class="row"><span class="lbl">MP</span><div class="bar"><div id="mpf"></div></div><span class="val" id="mpt"></span></div>
+    <div class="row" title="Shadow Gauge: fills as you fight. When full, press X for Monarch's Domain."><span class="lbl">SG</span><div class="bar"><div id="sgf"></div></div><span class="val" id="sgt"></span></div>
     <div class="stats">STR <b id="str"></b> · Shadows <b id="armyc">0</b> · Deployed <b id="activec">0</b>/<b id="limit">0</b> + boss <b id="bossc">0</b>/1 · Reforming <b id="recc">0</b></div>
     <div id="buff"></div>
+    <div id="boonsRow"></div>
   </div>
   <div id="rift" class="panel"><div id="riftName"></div><div id="riftInfo"></div></div>
   <div id="bossbar" class="panel hidden"><div class="bn"></div><div class="bb"><div id="bossf"></div><div class="bt"></div></div></div>
   <div id="feed"></div>
+  <div id="combo" class="hidden"><b>0</b><span>COMBO</span><i></i></div>
   <div id="big"><div class="t"></div><div class="s"></div></div>
   <div id="ariseHint" class="panel hidden">Fallen souls nearby — press <b>R</b> or say <b>"Arise"</b> (15 MP)</div>
   <div id="lockHint">Click to lock mouse · Esc to release · P to pause</div>
@@ -195,6 +229,14 @@
 
 <div id="army" class="panel hidden"></div>
 <div id="deployMenu" class="panel hidden"></div>
+
+<div id="boonMenu" class="overlay hidden">
+  <div class="card panel">
+    <h1 style="font-size:34px;letter-spacing:8px">CHOOSE A BOON</h1>
+    <div class="tag">The boss has fallen. Claim one power for the rest of this run.</div>
+    <div id="boonCards"></div>
+  </div>
+</div>
 
 <div id="pauseMenu" class="overlay hidden">
   <div class="card panel">
@@ -229,13 +271,14 @@
       <b>Left side</b><span>Drag to move</span>
       <b>Right side</b><span>Drag to look around</span>
       <b>⚔</b><span>Hold to attack — auto-aims at the nearest enemy</span>
-      <b>Ring</b><span>Deploy (next to ⚔), Dash, Dodge, Shadow Rend, Umbral Step, Daggers, Sovereign, ARISE</span>
+      <b>Ring</b><span>Deploy (next to ⚔), DOMAIN (ultimate), Dash, Dodge, Shadow Rend, Umbral Step, Daggers, Sovereign, ARISE</span>
       <b>Top</b><span>Recall shadows, army roster, voice ("Arise!") · top-left ❚❚ pauses, saves and exits</span>
     </div>
     <div class="ctrl deskOnly">
       <b>W A S D</b><span>Move · Mouse: look (click to lock) · Wheel: zoom</span>
       <b>LMB</b><span>Dagger combo — 3rd hit is a spinning slash</span>
       <b>SHIFT</b><span>Dash — invulnerable, use it to escape red danger zones</span>
+      <b>X</b><span>Monarch's Domain — when the Shadow Gauge is full: shockwave, slowed enemies, +50% damage</span>
       <b>SPACE</b><span>Dodge Roll — roll through a hit for a Perfect Dodge (+50% damage for 2s)</span>
       <b>E</b><span>Shadow Rend — area blast around you</span>
       <b>F</b><span>Umbral Step — teleport behind an enemy and backstab (ignores blocks)</span>
@@ -798,7 +841,7 @@ const AB = {
 const cds = Object.fromEntries(Object.keys(AB).map(k => [k, 0]));
 $('skills').innerHTML = '<div class="chip panel"><b>LMB</b>Attack</div><div class="chip panel"><b>Q</b>Deploy<em>MP by rank</em></div>'
   + Object.entries(AB).map(([id, a]) => `<div class="chip panel" id="c-${id}"><b>${a.key}</b>${a.name}${a.mp ? `<em>${a.mp} MP</em>` : ''}<div class="cd"></div></div>`).join('')
-  + '<div class="chip panel"><b>G</b>Recall</div>'
+  + '<div class="chip panel" id="c-ult"><b>X</b>Domain<em>Shadow Gauge</em><div class="cd"></div></div><div class="chip panel"><b>G</b>Recall</div>'
   + '<div class="chip panel" id="c-voice"><b>V</b>Voice: off</div><div class="chip panel"><b>TAB</b>Army</div>';
 
 // ================================================================ audio
@@ -862,18 +905,39 @@ player.pos = player.root.position;
 scene.add(player.root);
 const aura = new THREE.PointLight(0x8b5cf6, 6, 9); aura.position.y = 2; player.root.add(aura);
 const HP_PER_LEVEL = 20; // max HP gained every level
+
+// ================================================================ boons (one is chosen after every boss)
+const BOONS = {
+  vamp:    { ic: '🩸', name: 'Bloodthirst',   max: 3, desc: n => `Every enemy kill heals ${3 * n}% of your max HP.` },
+  crit:    { ic: '🗡️', name: 'Keen Edge',     max: 3, desc: n => `+${10 * n}% critical hit chance on dagger strikes.` },
+  swift:   { ic: '💨', name: 'Wraith Step',   max: 2, desc: n => `+${12 * n}% move speed; Dash and Dodge recharge ${25 * n}% faster.` },
+  well:    { ic: '🔮', name: 'Soul Well',     max: 3, desc: n => `Kills restore +${3 * n} MP and mana regenerates ${30 * n}% faster.` },
+  rend:    { ic: '🌀', name: 'Rending Void',  max: 2, desc: n => `Shadow Rend deals +${60 * n}% damage in a ${20 * n}% wider blast.` },
+  tempest: { ic: '🌪️', name: 'Twin Tempest',  max: 2, desc: n => `Dagger Tempest throws ${n} extra volley${n > 1 ? 's' : ''}.` },
+  thorns:  { ic: '🌵', name: 'Umbral Thorns', max: 2, desc: n => `Enemies that hit you take ${50 * n}% of that damage back.` },
+  legion:  { ic: '⚔️', name: 'Legion',        max: 2, desc: n => `+${2 * n} shadow soldier slots on the field.` },
+  phantom: { ic: '👻', name: 'Phantom Edge',  max: 1, desc: () => 'A Perfect Dodge recharges Dash and Dodge and releases a damaging shockwave.' },
+  exec:    { ic: '💀', name: 'Executioner',   max: 2, desc: n => `+${40 * n}% damage to enemies below 30% HP.` },
+  iron:    { ic: '🛡️', name: 'Iron Shade',    max: 3, desc: n => `+${20 * n}% max HP.` },
+  frenzy:  { ic: '🔥', name: 'Frenzy',        max: 1, desc: () => 'Combos last twice as long and their damage bonus goes up to +60%.' },
+  reaper:  { ic: '🪦', name: 'Soul Reaper',   max: 1, desc: () => 'Arise costs no mana and succeeds 15% more often.' },
+  gauge:   { ic: '🌑', name: 'Monarch\'s Will', max: 2, desc: n => `The Shadow Gauge fills ${40 * n}% faster.` },
+};
+let boons = {};
+const bn = id => boons[id] || 0;
 function recalcStats() {
   const L = player.level;
   player.maxHp = Math.round(160 + L * HP_PER_LEVEL); player.maxMp = Math.round(90 + L * 2.5);
-  player.str = 12 + L * 0.6; player.speed = 7 + Math.min(2.5, L * 0.03);
+  player.maxHp = Math.round(player.maxHp * (1 + 0.2 * bn('iron')));
+  player.str = 12 + L * 0.6; player.speed = (7 + Math.min(2.5, L * 0.03)) * (1 + 0.12 * bn('swift'));
   aura.intensity = 6 + Math.min(20, L * 0.2);
 }
 // On the field at once: up to 10 shadow soldiers (the limit grows with level) plus one shadow boss.
 // You can own any number of boss shadows; only one fights at a time.
 const MAX_DEPLOYED = 10;
-const armyLimit = () => Math.min(MAX_DEPLOYED, 3 + Math.floor(player.level / 2));
+const armyLimit = () => Math.min(MAX_DEPLOYED + 2 * bn('legion'), 3 + 2 * bn('legion') + Math.floor(player.level / 2));
 const isBossEntry = a => TYPES[a.type].boss;
-const pDmg = () => player.str * (buffT > 0 ? 1.25 : 1) * (player.counterT > 0 ? 1.5 : 1);
+const pDmg = () => player.str * (buffT > 0 ? 1.25 : 1) * (player.counterT > 0 ? 1.5 : 1) * (domainT > 0 ? 1.5 : 1);
 
 // ================================================================ save
 // The run in progress (which rift to continue from, and lives used) is saved alongside level and army.
@@ -881,7 +945,7 @@ let savedRun = null;
 function runCheckpoint() {
   if (livesLeft() <= 0) return null;
   const next = riftState === 'cleared' ? rift + 1 : Math.max(1, rift);
-  return next > 1 || deaths ? { rift: next, deaths } : null;
+  return next > 1 || deaths ? { rift: next, deaths, boons: { ...boons } } : null;
 }
 // While a rift is in progress, shadows raised in it aren't kept yet: the save holds the army
 // you entered the rift with, and only a cleared rift locks in the new shadows.
@@ -1214,6 +1278,8 @@ function dealDamage(target, amount, src, o = {}) {
     player.hp -= amount;
     player.sinceHit = 0;
     player.hitFlash = 0.12;
+    if (player.chain > 0) { player.chain = Math.floor(player.chain / 2); comboUI(true); }
+    if (bn('thorns') && src && !src.isPlayer && src.alive && src.team === 'enemy') dealDamage(src, amount * 0.5 * bn('thorns'), null, { noBlock: true, quiet: true });
     floatText(player.pos.clone().setY(2.6), '-' + Math.round(amount), '#ff6b6b', 16);
     const f = $('flash'); f.style.opacity = Math.min(1, 0.4 + amount / player.maxHp * 3); setTimeout(() => f.style.opacity = 0, 130);
     if (amount > player.maxHp * 0.12) shake(0.35);
@@ -1240,6 +1306,13 @@ function dealDamage(target, amount, src, o = {}) {
   if (T.block && !o.noBlock && target.stun <= 0 && target.attackT <= 0 && src?.pos) {
     const to = src.pos.clone().sub(target.pos).setY(0).normalize();
     if (fwdOf(target).dot(to) > 0.4) { amount *= 0.3; tag = 'BLOCK '; sfx('block'); }
+  }
+  if (src === player && amount > 0) {
+    if (bn('exec') && target.hp / target.maxHp < 0.3) amount *= 1 + 0.4 * bn('exec');
+    amount *= comboMul();
+    bumpCombo(o.crit);
+    addGauge(o.crit ? 1.4 : 0.6);
+    if (o.crit) hitStop(0.035);
   }
   target.hp -= amount;
   target.sinceHit = 0;
@@ -1268,7 +1341,10 @@ function killUnit(u, src) {
     marker.rotation.x = -Math.PI / 2; marker.position.set(u.pos.x, 0.06, u.pos.z); marker.scale.setScalar(T.radius * 1.6 + 0.5);
     scene.add(marker); u.marker = marker;
     corpses.push(u);
-    player.mp = Math.min(player.maxMp, player.mp + 2);
+    player.mp = Math.min(player.maxMp, player.mp + 2 + 3 * bn('well'));
+    if (bn('vamp') && player.alive) { const h = player.maxHp * 0.03 * bn('vamp'); player.hp = Math.min(player.maxHp, player.hp + h); floatText(player.pos.clone().setY(2.7), '+' + Math.round(h), '#f87171', 13); }
+    addGauge(T.boss ? 30 : 4);
+    dropOrbs(u.pos, T.boss ? 5 : Math.random() < 0.25 ? 1 : 0, T.boss ? 5 : Math.random() < 0.3 ? 1 : 0);
     // You only level up by defeating bosses: 3 levels for a guardian, 5 for a major boss.
     if (T.boss) {
       const gain = T.guardian ? BOSS_LEVELS.guardian : BOSS_LEVELS.major;
@@ -1277,6 +1353,7 @@ function killUnit(u, src) {
       const by = src && !src.isPlayer && src.name ? ` (by ${src.name})` : '';
       notify(`<b>${T.name}</b> defeated${by} · <span style="color:#93c5fd">+${gain} levels → Lv. ${player.level + gain}</span>`, 'gold');
       for (let i = 0; i < gain; i++) later(0.3 * i, () => levelUp(T.name, src, true));
+      slowMo(1.6, 0.22); // dramatic finish
     }
   } else {
     const entry = army.find(a => a.id === u.armyId);
@@ -1344,7 +1421,8 @@ function resolveExtraction(c) {
   const T = TYPES[c.type];
   const chance = T.guardian ? Math.min(0.6, 0.3 + player.level * 0.002)
     : T.boss ? Math.min(0.5, 0.18 + player.level * 0.0015) : c.elite ? 0.6 : 0.85;
-  if (Math.random() < chance) {
+  const odds = chance + 0.15 * bn('reaper');
+  if (Math.random() < odds) {
     removeCorpse(c);
     const entry = { id: ++armyIdSeq, type: c.type, name: pickName(c.type), status: 'stored', recover: 0 };
     army.push(entry);
@@ -1413,7 +1491,7 @@ function openMenu(kind) {
 }
 function closeMenu(relock = true) {
   menuOpen = null; paused = false;
-  $('deployMenu').classList.add('hidden'); $('pauseMenu').classList.add('hidden');
+  $('deployMenu').classList.add('hidden'); $('pauseMenu').classList.add('hidden'); $('boonMenu').classList.add('hidden');
   if (relock) lockMouse();
 }
 function openDeployMenu() {
@@ -1526,8 +1604,9 @@ const canAct = () => playing && !paused && player.alive;
 function tryCast(id) {
   const a = AB[id];
   if (!canAct() || cds[id] > 0) return false;
-  if (player.mp < a.mp) { notify(`Not enough mana for ${a.name} (${a.mp} MP).`, 'red'); sfx('fail'); return false; }
-  player.mp -= a.mp; cds[id] = a.cd;
+  const mp = id === 'arise' && bn('reaper') ? 0 : a.mp;
+  if (player.mp < mp) { notify(`Not enough mana for ${a.name} (${mp} MP).`, 'red'); sfx('fail'); return false; }
+  player.mp -= mp; cds[id] = a.cd * ((id === 'dash' || id === 'dodge') ? 1 - 0.25 * bn('swift') : 1);
   return true;
 }
 // Desktop aims where the camera looks; on touch, aim at the nearest enemy (or straight ahead).
@@ -1557,7 +1636,7 @@ function playerAttack() {
     const dx = e.pos.x - player.pos.x, dz = e.pos.z - player.pos.z, d = Math.hypot(dx, dz) || 0.01;
     if (d > range + e.radius) continue;
     if (!big && (dx * fwd.x + dz * fwd.z) / d < 0.2 && d > 1 + e.radius) continue;
-    const crit = Math.random() < 0.15;
+    const crit = Math.random() < 0.15 + 0.1 * bn('crit');
     const dmg = pDmg() * (0.9 + Math.random() * 0.2) * (big ? 1.7 : 1) * (crit ? 2 : 1);
     if (!TYPES[e.type].boss) e.kb = new THREE.Vector3(dx / d, 0, dz / d).multiplyScalar(big ? 7 : 2.5);
     dealDamage(e, dmg, player, { crit }); hit++;
@@ -1593,17 +1672,24 @@ function perfectDodge() {
   player.lastPerfect = time; player.counterT = 2;
   floatText(player.pos.clone().setY(2.9), 'PERFECT DODGE', '#c4b5fd', 18);
   ringFX(player.pos, 0xc4b5fd, 3, 0.4);
+  addGauge(8); hitStop(0.08);
+  if (bn('phantom')) {
+    cds.dash = 0; cds.dodge = 0;
+    ringFX(player.pos, 0xe9d5ff, 4.5, 0.4);
+    for (const e of enemiesAlive) if (e.alive && dist2D(e.pos, player.pos) < 4.5 + e.radius) dealDamage(e, pDmg() * 2, player, { noBlock: true });
+  }
 }
 
 function shadowRend() {
   if (!tryCast('rend')) return;
   sfx('rend'); shake(0.25);
-  ringFX(player.pos, 0x8b5cf6, 7, 0.45); ringFX(player.pos, 0x312e81, 5, 0.6);
+  const rr = 6.5 * (1 + 0.2 * bn('rend'));
+  ringFX(player.pos, 0x8b5cf6, rr + 0.5, 0.45); ringFX(player.pos, 0x312e81, rr - 1.5, 0.6);
   burstFX(player.pos.clone().setY(0.5), 0x8b5cf6, 24, 10);
   for (const e of enemiesAlive) {
-    if (!e.alive || dist2D(e.pos, player.pos) > 6.5 + e.radius) continue;
+    if (!e.alive || dist2D(e.pos, player.pos) > rr + e.radius) continue;
     if (!TYPES[e.type].boss) e.kb = e.pos.clone().sub(player.pos).setY(0).normalize().multiplyScalar(12);
-    dealDamage(e, pDmg() * 3 * (0.9 + Math.random() * 0.2), player);
+    dealDamage(e, pDmg() * 3 * (1 + 0.6 * bn('rend')) * (0.9 + Math.random() * 0.2), player);
   }
 }
 
@@ -1637,14 +1723,18 @@ function daggerTempest() {
   if (!tryCast('tempest')) return;
   const f = aimDir(18), base = Math.atan2(f.x, f.z);
   player.root.rotation.y = base; player.attackT = 1;
-  for (let i = 0; i < 7; i++) {
-    const a = base + (i - 3) * 0.09;
-    const dir = new THREE.Vector3(Math.sin(a), 0, Math.cos(a));
-    const m = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.8), fxMat(0xb46cff));
-    m.position.copy(player.pos).setY(1.3); m.rotation.y = a; scene.add(m);
-    projectiles.push({ m, v: dir.multiplyScalar(32), team: 'shadow', dmg: pDmg() * 1.6, life: 0.6, src: player, pierce: true, hit: new Set(), r: 0.6 });
-  }
-  sfx('slash'); sfx('dash');
+  const volley = (off) => {
+    for (let i = 0; i < 7; i++) {
+      const a = base + (i - 3) * 0.09 + off;
+      const dir = new THREE.Vector3(Math.sin(a), 0, Math.cos(a));
+      const m = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.8), fxMat(0xb46cff));
+      m.position.copy(player.pos).setY(1.3); m.rotation.y = a; scene.add(m);
+      projectiles.push({ m, v: dir.multiplyScalar(32), team: 'shadow', dmg: pDmg() * 1.6, life: 0.6, src: player, pierce: true, hit: new Set(), r: 0.6 });
+    }
+    sfx('slash'); sfx('dash');
+  };
+  volley(0);
+  for (let k = 1; k <= bn('tempest'); k++) later(0.15 * k, () => volley((k % 2 ? 0.045 : -0.045)));
 }
 
 function nightSovereignty() {
@@ -1696,7 +1786,7 @@ function updatePlayer(dt) {  player.atkCd -= dt; player.invuln -= dt; player.com
     player.rig.body.rotation.x = Math.max(-Math.PI / 2, player.rig.body.rotation.x - dt * 4);
     return;
   }
-  player.mp = Math.min(player.maxMp, player.mp + dt * (0.9 + player.level * 0.008));
+  player.mp = Math.min(player.maxMp, player.mp + dt * (0.9 + player.level * 0.008) * (1 + 0.3 * bn('well')));
   player.hp = Math.min(player.maxHp, player.hp + dt * (0.5 + player.level * 0.02) * (riftState === 'fighting' || riftState === 'boss' ? 1 : 10));
   updateRegen(dt);
   if ((mouseHeld && document.pointerLockElement === canvas) || touchAttack) playerAttack();
@@ -2503,6 +2593,128 @@ function updateRift(dt) {
 function endRift() {
   riftState = 'cleared'; interT = 14;
   bigText('RIFT CLEARED', 'RAISE YOUR FALLEN FOES BEFORE THEY FADE');
+  later(2.2, openBoonDraft);
+}
+
+// ================================================================ boon draft
+let boonChoices = [];
+function openBoonDraft() {
+  if (!playing || !player.alive || menuOpen) { if (playing && player.alive) later(0.5, openBoonDraft); return; }
+  const pool = Object.keys(BOONS).filter(id => bn(id) < BOONS[id].max);
+  if (!pool.length) return;
+  boonChoices = [];
+  while (boonChoices.length < Math.min(3, pool.length)) { const id = pool[Math.floor(Math.random() * pool.length)]; if (!boonChoices.includes(id)) boonChoices.push(id); }
+  openMenu('boon');
+  $('boonCards').innerHTML = boonChoices.map((id, i) => {
+    const B = BOONS[id], n = bn(id) + 1;
+    return `<div class="boon" data-boon="${id}"><span class="k">${IS_TOUCH ? 'TAP' : i + 1}</span><div class="ic">${B.ic}</div><h3>${B.name}${B.max > 1 ? ' ' + 'I'.repeat(n) : ''}</h3><p>${B.desc(n)}</p><div class="st">${B.max > 1 ? `Rank ${n} of ${B.max}` : 'Unique'}</div></div>`;
+  }).join('');
+  $('boonMenu').classList.remove('hidden');
+  sfx('lvl');
+}
+function pickBoon(id) {
+  if (menuOpen !== 'boon' || !boonChoices.includes(id)) return;
+  boons[id] = bn(id) + 1;
+  const hpFrac = player.hp / player.maxHp;
+  recalcStats(); player.hp = player.maxHp * hpFrac;
+  $('boonMenu').classList.add('hidden');
+  closeMenu();
+  bigText(BOONS[id].name.toUpperCase(), BOONS[id].desc(bn(id)));
+  pillarFX(player.pos, 0xe879f9, 7, 1, 1); sfx('arise');
+  save();
+}
+$('boonCards').addEventListener('click', e => { const c = e.target.closest('[data-boon]'); if (c) pickBoon(c.dataset.boon); });
+
+// ================================================================ combo meter
+// Your own hits build a combo: +1% damage per hit (up to +25%, or +60% with Frenzy).
+// It fades if you stop hitting, and taking damage cuts it in half.
+const COMBO_RANKS = [[100, 'SOVEREIGN'], [60, 'SAVAGE'], [30, 'BRUTAL'], [15, 'GREAT'], [5, 'NICE']];
+const comboMul = () => 1 + Math.min(bn('frenzy') ? 0.6 : 0.25, (player.chain || 0) * 0.01);
+function bumpCombo(crit) {
+  player.chain = (player.chain || 0) + 1;
+  player.chainT = bn('frenzy') ? 5 : 2.5;
+  const r = COMBO_RANKS.findIndex(([n]) => player.chain >= n);
+  if (r >= 0 && player.chain === COMBO_RANKS[r][0]) { floatText(player.pos.clone().setY(3.3), COMBO_RANKS[r][1] + '!', '#f0abfc', 22); sfx('lvl'); }
+  comboUI(true);
+}
+function comboUI(pop) {
+  const el = $('combo'), n = player.chain || 0;
+  el.classList.toggle('hidden', n < 3);
+  if (n < 3) return;
+  el.querySelector('b').textContent = n;
+  const rank = COMBO_RANKS.find(([k]) => n >= k);
+  el.querySelector('span').textContent = rank ? rank[1] + ' COMBO' : 'COMBO';
+  el.querySelector('i').textContent = `+${Math.round((comboMul() - 1) * 100)}% damage`;
+  if (pop) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }
+}
+
+// ================================================================ Shadow Gauge & Monarch's Domain (ultimate, X)
+let gauge = 0, domainT = 0, gaugeToldFull = false;
+function addGauge(v) {
+  if (domainT > 0 || !playing) return;
+  gauge = Math.min(100, gauge + v * (1 + 0.4 * bn('gauge')));
+  if (gauge >= 100 && !gaugeToldFull) { gaugeToldFull = true; notify(`<b style="color:#f0abfc">Shadow Gauge full!</b> Press <b>${IS_TOUCH ? 'DOMAIN' : 'X'}</b> to unleash Monarch's Domain.`, 'gold'); sfx('lvl'); }
+}
+function monarchsDomain() {
+  if (!canAct() || gauge < 100) { if (playing && gauge < 100) notify(`The Shadow Gauge is at ${Math.floor(gauge)}% — keep fighting to fill it.`); return; }
+  gauge = 0; gaugeToldFull = false; domainT = 8;
+  buffT = Math.max(buffT, 8);
+  slowMo(0.7, 0.2);
+  bigText("MONARCH'S DOMAIN", 'Time bends to your will');
+  sfx('arise'); sfx('roar'); shake(0.9);
+  ringFX(player.pos, 0xe879f9, 16, 0.8); ringFX(player.pos, 0x7c3aed, 12, 1.1); pillarFX(player.pos, 0xa855f7, 14, 1.4, 2.2);
+  burstFX(player.pos.clone().setY(1), 0xe879f9, 40, 12);
+  for (const e of enemiesAlive) {
+    if (!e.alive || dist2D(e.pos, player.pos) > 14 + e.radius) continue;
+    const T = TYPES[e.type];
+    if (!T.boss) { e.stun = Math.max(e.stun, 2); e.kb = e.pos.clone().sub(player.pos).setY(0).normalize().multiplyScalar(10); }
+    dealDamage(e, pDmg() * 6, player, { noBlock: true, crit: true });
+  }
+  for (const u of activeShadows()) { u.hp = Math.min(u.maxHp, u.hp + u.maxHp * 0.5); pillarFX(u.pos, 0xa855f7, 5, 0.8, u.radius + 0.4); }
+}
+
+// ================================================================ time effects (slow motion, hit-stop)
+let slowMoT = 0, slowMoScale = 1, hitStopT = 0;
+function slowMo(sec, scale) { slowMoT = Math.max(slowMoT, sec); slowMoScale = scale; }
+function hitStop(sec) { hitStopT = Math.max(hitStopT, sec); }
+function timeScale(realDt) {
+  let k = 1;
+  if (hitStopT > 0) { hitStopT -= realDt; k = 0.06; }
+  else if (slowMoT > 0) { slowMoT -= realDt; k = slowMoScale; }
+  return k;
+}
+
+// ================================================================ health & mana orbs
+let orbs = [];
+const ORB_GEO = new THREE.SphereGeometry(0.22, 12, 10);
+function dropOrbs(pos, nHp, nMp) {
+  for (let i = 0; i < nHp + nMp; i++) {
+    const hp = i < nHp, m = new THREE.Mesh(ORB_GEO, new THREE.MeshBasicMaterial({ color: hp ? 0x4ade80 : 0x60a5fa }));
+    m.userData.sharedGeo = true;
+    const a = Math.random() * TAU, r = 0.6 + Math.random() * 1.6;
+    m.position.set(pos.x + Math.cos(a) * r, 0.6, pos.z + Math.sin(a) * r); scene.add(m);
+    orbs.push({ m, hp, life: 16, seed: Math.random() * 10, v: new THREE.Vector3(Math.cos(a) * 3, 5, Math.sin(a) * 3) });
+  }
+}
+function updateOrbs(dt) {
+  orbs = orbs.filter(o => {
+    o.life -= dt;
+    const p = o.m.position;
+    if (o.v) { p.addScaledVector(o.v, dt); o.v.y -= 14 * dt; if (p.y <= 0.6) { p.y = 0.6; o.v = null; } }
+    else p.y = 0.6 + Math.sin(time * 4 + o.seed) * 0.12;
+    const d = Math.hypot(player.pos.x - p.x, player.pos.z - p.z);
+    if (player.alive && d < 7) { const k = Math.min(1, dt * (16 / Math.max(0.5, d))); p.x += (player.pos.x - p.x) * k; p.z += (player.pos.z - p.z) * k; }
+    o.m.scale.setScalar(1 + Math.sin(time * 6 + o.seed) * 0.15);
+    if (player.alive && d < 1.1) {
+      if (o.hp) { const h = player.maxHp * 0.06; player.hp = Math.min(player.maxHp, player.hp + h); floatText(player.pos.clone().setY(2.6), '+' + Math.round(h) + ' HP', '#4ade80', 14); }
+      else { player.mp = Math.min(player.maxMp, player.mp + 8); floatText(player.pos.clone().setY(2.6), '+8 MP', '#93c5fd', 14); }
+      burstFX(p.clone(), o.hp ? 0x4ade80 : 0x60a5fa, 6, 3); sfx('heal');
+      disposeObj(o.m); return false;
+    }
+    if (o.life <= 0) { disposeObj(o.m); return false; }
+    if (o.life < 3) o.m.visible = Math.floor(o.life * 8) % 2 === 0;
+    return true;
+  });
 }
 // ================================================================ voice
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -2531,7 +2743,7 @@ function toggleVoice() {
 // ================================================================ input
 const KEYMAP = {
   KeyR: arise, KeyE: shadowRend, KeyF: umbralStep, Digit1: daggerTempest, Digit2: nightSovereignty,
-  ShiftLeft: dash, ShiftRight: dash, Space: dodge, KeyQ: openDeployMenu, KeyG: recallArmy, KeyV: toggleVoice,
+  ShiftLeft: dash, ShiftRight: dash, Space: dodge, KeyQ: openDeployMenu, KeyG: recallArmy, KeyX: monarchsDomain, KeyV: toggleVoice,
 };
 addEventListener('keydown', e => {
   if (e.code === 'Tab') { e.preventDefault(); if (playing) toggleArmyPanel(); return; }
@@ -2540,9 +2752,10 @@ addEventListener('keydown', e => {
   if (!playing) return;
   initAudio();
   if (menuOpen) {
-    if (e.code === 'Escape') { if (menuOpen === 'pause' && performance.now() - pauseOpenedAt < 400) return; closeMenu(); }
+    if (e.code === 'Escape') { if (menuOpen === 'boon') return; if (menuOpen === 'pause' && performance.now() - pauseOpenedAt < 400) return; closeMenu(); }
     else if (menuOpen === 'deploy' && e.code === 'KeyQ') closeMenu();
     else if (menuOpen === 'deploy' && (e.code === 'Enter' || e.code === 'NumpadEnter')) deploySelected();
+    else if (menuOpen === 'boon' && /^(Digit|Numpad)[123]$/.test(e.code)) pickBoon(boonChoices[+e.code.slice(-1) - 1]);
     return;
   }
   if (e.code === 'Escape') { openPauseMenu(); return; }
@@ -2600,7 +2813,7 @@ function setupTouch() {
   // Ability buttons sit in two arcs around the attack button; Deploy is right next to it.
   const ring = [
     ['deploy', 'Deploy', 102, -4], ['dash', 'Dash', 102, 31], ['rend', 'Rend', 102, 63], ['arise', 'ARISE', 102, 96],
-    ['dodge', 'Dodge', 170, 0], ['step', 'Step', 170, 30], ['tempest', 'Daggers', 170, 60], ['sov', 'Sovereign', 170, 90],
+    ['ult', 'DOMAIN', 170, -10], ['dodge', 'Dodge', 170, 18], ['step', 'Step', 170, 45], ['tempest', 'Daggers', 170, 72], ['sov', 'Sovereign', 170, 99],
   ];
   const cx = 26 + 44, cy = 26 + 44; // attack button centre, measured from the right/bottom edges
   for (const [id, label, r, deg] of ring) {
@@ -2614,7 +2827,7 @@ function setupTouch() {
   }
 
   const ACTIONS = {
-    dash, dodge, rend: shadowRend, step: umbralStep, tempest: daggerTempest, sov: nightSovereignty, arise,
+    dash, dodge, ult: monarchsDomain, rend: shadowRend, step: umbralStep, tempest: daggerTempest, sov: nightSovereignty, arise,
     deploy: openDeployMenu, recall: recallArmy, army: toggleArmyPanel, voice: toggleVoice,
     menu: () => (menuOpen ? closeMenu() : openPauseMenu()),
   };
@@ -2708,6 +2921,9 @@ function clearField() {
   for (const t of telegraphs) disposeObj(t.g);
   for (const h of hazards) disposeObj(h.m);
   hazards = []; bossQueue = [];
+  for (const o of orbs) disposeObj(o.m);
+  orbs = []; domainT = 0; slowMoT = 0; hitStopT = 0; player.chain = 0; player.chainT = 0;
+  $('domainFx').classList.remove('on'); $('combo').classList.add('hidden');
   units = []; corpses = []; projectiles = []; timers = []; telegraphs = [];
   for (const a of army) if (a.status === 'active') a.status = 'stored';
 }
@@ -2718,6 +2934,8 @@ function beginRun(cont = null) {
   player.pos.set(0, 0, 0); player.rig.body.rotation.set(0, 0, 0);
   for (const k in cds) cds[k] = 0;
   buffT = 0; deaths = cont ? cont.deaths : 0; riftSnap = null; resetPlayerPose();
+  boons = cont && cont.boons ? { ...cont.boons } : {}; gauge = 0; gaugeToldFull = false;
+  recalcStats(); player.hp = player.maxHp;
   rift = cont ? cont.rift - 1 : 0; riftState = 'start'; interT = 4; spawnQueue = [];
   menuOpen = null;
   playing = true; paused = false;
@@ -2784,6 +3002,12 @@ function updateHUD() {
   $('mpf').style.width = (player.mp / player.maxMp * 100) + '%';
   $('hpt').textContent = `${Math.ceil(Math.max(0, player.hp))} / ${player.maxHp}`;
   $('mpt').textContent = `${Math.floor(player.mp)} / ${player.maxMp}`;
+  $('sgf').style.width = (domainT > 0 ? domainT / 8 * 100 : gauge) + '%';
+  $('sgf').classList.toggle('full', gauge >= 100 || domainT > 0);
+  $('sgt').textContent = domainT > 0 ? `DOMAIN ${Math.ceil(domainT)}s` : gauge >= 100 ? 'READY · X' : `${Math.floor(gauge)}%`;
+  { const c = $('c-ult'); c.classList.toggle('ready', gauge >= 100); c.querySelector('.cd').style.height = (100 - gauge) + '%'; }
+  { const t = $('tb-ult'); if (t) { t.classList.toggle('ready', gauge >= 100); t.querySelector('.cd').style.height = (100 - gauge) + '%'; } }
+  $('boonsRow').innerHTML = Object.entries(boons).map(([id, n]) => `<span title="${BOONS[id].name}: ${BOONS[id].desc(n)}">${BOONS[id].ic} ${BOONS[id].name}${n > 1 ? ' ' + n : ''}</span>`).join('');
   $('str').textContent = Math.round(pDmg());
   $('armyc').textContent = army.length;
   $('lives').innerHTML = '<span style="color:#f87171">' + '♥'.repeat(Math.max(0, livesLeft())) + '</span><span style="color:#4b5563">' + '♥'.repeat(Math.min(MAX_LIVES, deaths)) + '</span>';
@@ -2831,7 +3055,12 @@ function updateWorld(dt) {
   buffT -= dt;
   guard('player', () => updatePlayer(dt));
   guard('rift', () => updateRift(dt));
-  for (const u of units) if (u.alive) guard('unit:' + u.type, () => updateUnit(u, dt));
+  // Monarch's Domain slows every enemy to under half speed.
+  if (domainT > 0) { domainT -= dt; if (domainT <= 0) notify("Monarch's Domain fades."); }
+  $('domainFx').classList.toggle('on', domainT > 0);
+  for (const u of units) if (u.alive) guard('unit:' + u.type, () => updateUnit(u, u.team === 'enemy' && domainT > 0 ? dt * 0.45 : dt));
+  guard('orbs', () => updateOrbs(dt));
+  if (player.chainT > 0 && (player.chainT -= dt) <= 0) { player.chain = 0; comboUI(false); }
   guard('separate', separate);
   guard('corpses', () => updateCorpses(dt));
   guard('projectiles', () => updateProjectiles(dt));
@@ -2852,7 +3081,7 @@ function updateWorld(dt) {
 function loop() {
   requestAnimationFrame(loop);
   const realDt = Math.min(clock.getDelta(), 0.05);
-  const dt = playing && !paused ? realDt : 0;
+  const dt = playing && !paused ? realDt * timeScale(realDt) : 0;
   time += dt;
   if (dt > 0) updateWorld(dt);
   guard('effects', () => {
