@@ -23,7 +23,8 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 - **Save and continue later.** Press **Esc** (or the ❚❚ button in the top-left corner on a phone) to pause. From there you can resume, or **Save & Exit** back to the title screen. Your level and current rift are saved; the title screen then offers **Continue** from that rift, with the lives you had left, or a new run from Rift 1. If you leave in the middle of a rift, you come back with the shadow army you had when that rift began: shadows raised in an unfinished rift are only kept once you clear it. Progress is also saved at the start of every rift.
 - **Your army has a price.** Each shadow you own makes rift enemies 5% tougher and 2.5% stronger, up to 40 shadows. The rift panel shows the current bonus.
 - **Mana is scarce.** It refills slowly (about 1 per second), so choose your abilities and deployments carefully.
-- **Read the attacks.** Enemies wind up with a glowing flare in their weapon hand before each hit, and red energy gathers around them before a special attack.
+- **Read the attacks.** Enemies wind up with a glowing flare in their weapon hand before each hit, lean back as red energy gathers around them before a special attack, and lunge into their swings. Anything that gets hit flashes and recoils.
+- **Characters.** Every character has a glowing rim light: purple for you and your shadows, the colour of their eyes for enemies, and gold for elites. You, the casters, knights, Warchief, Duelist, Reaper and Tyrant wear capes that billow as they run; armoured foes have shoulder plates; giants kick up dust as they walk; and a faint shadow mist trails behind you.
 - **Clear the rifts.** Waves of goblins, dire wolves, orc brutes, warlocks and armored knights come through rift portals. **Every rift ends with a boss.** Bosses have phases, and their big attacks show a red warning zone on the ground before they hit.
   - **Every 5th rift** ends with a major boss: the Rift Colossus, the Bloodfang Alpha, the Ashen Lich or the **Void Tyrant**.
     - **Void Tyrant:** spinning cross-shaped void beams, gravity wells that drag you in before they explode, shadow-step strikes from behind below half HP, and below 25% an Event Horizon that blasts everything except the area close to it.
@@ -36,6 +37,7 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
     - **Storm Herald:** marching lines of lightning, chain lightning that jumps between you and your shadows, and below half HP an overcharge with a static surge that blinks it away.
     - **Bone Reaper:** a ring-shaped scythe sweep (stand right next to it to stay safe), death marks that hit where you stand three times, soul harvest that drains your shadows to heal it, and risen dead below 40% HP.
     - **Cinder Hound:** flame rushes that leave burning ground, rings of eruptions around you, and below half HP a trail of fire everywhere it runs.
+  - **Wolf bosses are rare.** The Bloodfang Alpha, Brood Mother and Cinder Hound show up only a tenth as often as the others; most of the time another boss takes their place.
   - From rift 16, two guardians appear at once.
   - **A boss never has more than 5 of its summoned guards alive at once.**
   - **Each rift's boss is much stronger than the last:** more HP, more damage, more armor and faster attacks.

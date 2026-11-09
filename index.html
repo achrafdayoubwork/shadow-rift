@@ -372,6 +372,28 @@ const portals = [[0, -46], [44, 16], [-44, 16]].map(([x, z]) => {
 
 // ================================================================ shared mesh helpers
 const M = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.75, metalness: 0.1, ...o });
+let RIM_ON = true;
+function addRim(mat, color, strength) {
+  if (!RIM_ON) return null;
+  const rim = { color: { value: new THREE.Color(color) }, strength: { value: strength }, base: strength };
+  mat.userData.rim = rim;
+  mat.onBeforeCompile = sh => {
+    sh.uniforms.rimColor = rim.color; sh.uniforms.rimStrength = rim.strength;
+    sh.fragmentShader = 'uniform vec3 rimColor;\nuniform float rimStrength;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>',
+      '#include <emissivemap_fragment>\n\tfloat rimF = 1.0 - clamp( dot( normalize( normal ), normalize( vViewPosition ) ), 0.0, 1.0 );\n\ttotalEmissiveRadiance += rimColor * pow( rimF, 2.5 ) * rimStrength;');
+  };
+  mat.customProgramCacheKey = () => 'rim';
+  return rim;
+}
+// Safety net: if the rim shader ever fails to compile, drop it everywhere and use the plain materials.
+renderer.debug.onShaderError = (gl, program, vs, fs) => {
+  console.warn('Shader compile failed', gl.getProgramInfoLog(program), gl.getShaderInfoLog(fs));
+  if (!RIM_ON) return;
+  RIM_ON = false;
+  scene.traverse(o => {
+    for (const m of [].concat(o.material || [])) if (m.userData?.rim) { m.onBeforeCompile = () => {}; m.customProgramCacheKey = () => 'plain'; delete m.userData.rim; m.needsUpdate = true; }
+  });
+};
 const shadowMat = () => M(0x0b0a14, { emissive: 0x2a0b5c, emissiveIntensity: 0.7 });
 const glowMat = (c, i = 1.8) => new THREE.MeshStandardMaterial({ color: 0x111111, emissive: c, emissiveIntensity: i, metalness: 0.6, roughness: 0.3 });
 function box(w, h, d, mat) { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.castShadow = true; return m; }
@@ -385,23 +407,23 @@ const MODEL_URLS = {
 };
 // Visual definition for each character built on a realistic rigged model.
 const LOOKS = {
-  player:   { base: 'soldier', h: 1.9,  tint: 0x4a4560, emissive: 0x0a0418, eyes: 0xa78bfa, weapons: [['R', 'dagger'], ['L', 'dagger']] },
+  player:   { base: 'soldier', h: 1.9,  tint: 0x4a4560, emissive: 0x0a0418, eyes: 0xa78bfa, weapons: [['R', 'dagger'], ['L', 'dagger']], cape: 0x1c1030, rim: 0x8b5cf6 },
   goblin:   { base: 'soldier', h: 1.35, tint: 0x7a9a3a, eyes: 0xff2a2a, weapons: [['R', 'club']] },
-  orc:      { base: 'soldier', h: 2.9,  tint: 0x5f8048, eyes: 0xffd000, weapons: [['R', 'axe']] },
-  warlock:  { base: 'soldier', h: 2.0,  tint: 0x9a2f3c, emissive: 0x200000, eyes: 0xff5500, weapons: [['R', 'staff']] },
-  knight:   { base: 'soldier', h: 2.3,  tint: 0xc0c8d6, eyes: 0x66ccff, weapons: [['R', 'sword'], ['L', 'shield']] },
+  orc:      { base: 'soldier', h: 2.9,  tint: 0x5f8048, eyes: 0xffd000, weapons: [['R', 'axe']], pauldrons: 0x4b4b52 },
+  warlock:  { base: 'soldier', h: 2.0,  tint: 0x9a2f3c, emissive: 0x200000, eyes: 0xff5500, weapons: [['R', 'staff']], cape: 0x3b0a10 },
+  knight:   { base: 'soldier', h: 2.3,  tint: 0xc0c8d6, eyes: 0x66ccff, weapons: [['R', 'sword'], ['L', 'shield']], cape: 0x1e3a8a, pauldrons: 0xb8bec8 },
   wolf:     { base: 'fox',     h: 1.25, tint: 0x6b6f78 },
-  colossus: { base: 'soldier', h: 7.2,  tint: 0xa06a48, emissive: 0x1a0800, eyes: 0xffaa00, weapons: [['R', 'club']], horns: 0xe5e0cc },
+  colossus: { base: 'soldier', h: 7.2,  tint: 0xa06a48, emissive: 0x1a0800, eyes: 0xffaa00, weapons: [['R', 'club']], horns: 0xe5e0cc, pauldrons: 0x6b6258 },
   alpha:    { base: 'fox',     h: 3.4,  tint: 0x8a2020, emissive: 0x200000 },
-  lich:     { base: 'soldier', h: 3.4,  tint: 0x3c3c50, emissive: 0x061a18, eyes: 0x00ffcc, weapons: [['R', 'staff']], horns: 0x222230, orb: 0x00ffcc },
-  warchief:    { base: 'soldier', h: 2.7, tint: 0x6f8f2a, emissive: 0x140800, eyes: 0xff2a2a, weapons: [['R', 'axe'], ['L', 'shield']], horns: 0xd6c9a8 },
-  warden:      { base: 'soldier', h: 3.0, tint: 0xa8dcff, emissive: 0x0a2a44, eyes: 0x7dd3fc, weapons: [['R', 'staff']], horns: 0xdbeafe, orb: 0x7dd3fc },
-  duelist:     { base: 'soldier', h: 2.3, tint: 0x9a1c30, emissive: 0x1a0006, eyes: 0xff3355, weapons: [['R', 'sword'], ['L', 'sword']] },
+  lich:     { base: 'soldier', h: 3.4,  tint: 0x3c3c50, emissive: 0x061a18, eyes: 0x00ffcc, weapons: [['R', 'staff']], horns: 0x222230, orb: 0x00ffcc, cape: 0x101018 },
+  warchief:    { base: 'soldier', h: 2.7, tint: 0x6f8f2a, emissive: 0x140800, eyes: 0xff2a2a, weapons: [['R', 'axe'], ['L', 'shield']], horns: 0xd6c9a8, cape: 0x4a3220, pauldrons: 0xd6c9a8 },
+  warden:      { base: 'soldier', h: 3.0, tint: 0xa8dcff, emissive: 0x0a2a44, eyes: 0x7dd3fc, weapons: [['R', 'staff']], horns: 0xdbeafe, orb: 0x7dd3fc, cape: 0x1e3a5f },
+  duelist:     { base: 'soldier', h: 2.3, tint: 0x9a1c30, emissive: 0x1a0006, eyes: 0xff3355, weapons: [['R', 'sword'], ['L', 'sword']], cape: 0x5c0a14 },
   broodmother: { base: 'fox',     h: 3.0, tint: 0x4f7f22, emissive: 0x0a2000 },
-  herald:      { base: 'soldier', h: 2.9, tint: 0xd9c25a, emissive: 0x2a2200, eyes: 0xfde047, weapons: [['R', 'staff']], horns: 0xfef08a, orb: 0xfde047 },
-  reaper:      { base: 'soldier', h: 3.1, tint: 0xd6d3c4, emissive: 0x0c1400, eyes: 0xa3e635, weapons: [['R', 'axe']], horns: 0x1c1917 },
+  herald:      { base: 'soldier', h: 2.9, tint: 0xd9c25a, emissive: 0x2a2200, eyes: 0xfde047, weapons: [['R', 'staff']], horns: 0xfef08a, orb: 0xfde047, cape: 0x5c4a12 },
+  reaper:      { base: 'soldier', h: 3.1, tint: 0xd6d3c4, emissive: 0x0c1400, eyes: 0xa3e635, weapons: [['R', 'axe']], horns: 0x1c1917, cape: 0x0c0c0c, pauldrons: 0xd6d3c4 },
   hound:       { base: 'fox',     h: 2.6, tint: 0xb4441a, emissive: 0x3a0a00 },
-  tyrant:      { base: 'soldier', h: 4.6, tint: 0x3a2a55, emissive: 0x1a0033, eyes: 0xd946ef, weapons: [['R', 'sword'], ['L', 'sword']], horns: 0x120a1f },
+  tyrant:      { base: 'soldier', h: 4.6, tint: 0x3a2a55, emissive: 0x1a0033, eyes: 0xd946ef, weapons: [['R', 'sword'], ['L', 'sword']], horns: 0x120a1f, cape: 0x1c0b33, pauldrons: 0x2a1a40 },
 };
 const gltfs = {}, templates = {};
 let MODELS_OK = false;
@@ -496,12 +518,39 @@ function buildTemplate(key) {
       attachRest(head, hm, hp.clone().add(new THREE.Vector3(side * 0.08 * s, 0.24 * s, 0)), s, q);
     }
   }
-  const spine = findBone(model, L.base === 'fox' ? /Spine01/i : /Spine1$/i);
   const fox = L.base === 'fox';
+  // Shoulder armour sits on top of each upper arm.
+  if (!fox && L.pauldrons != null) for (const side of ['Left', 'Right']) {
+    const arm = findBone(model, new RegExp(side + 'Arm$', 'i'));
+    if (!arm) continue;
+    const ap = worldPos(arm), out = Math.sign(ap.x) || 1;
+    const holderP = new THREE.Group(), m = new THREE.Mesh(new THREE.SphereGeometry(0.11, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), M(L.pauldrons, { metalness: 0.7, roughness: 0.35 }));
+    m.scale.set(1.15, 0.75, 1.1); m.castShadow = true; m.userData.weapon = true; holderP.add(m);
+    attachRest(arm, holderP, ap.add(new THREE.Vector3(out * 0.03 * s, 0.045 * s, 0)), s);
+  }
+  // A cape hangs from the upper back and swings with movement (animated in makeModelRig).
+  const back = !fox && L.cape != null ? (findBone(model, /Spine2$/i) || findBone(model, /Spine1$/i)) : null;
+  if (back) {
+    const geo = new THREE.PlaneGeometry(0.62, 1.15, 4, 8); geo.translate(0, -0.575, 0);
+    const pos = geo.attributes.position;
+    for (let i = 0; i < pos.count; i++) {
+      const x = pos.getX(i), y = pos.getY(i), flare = 1 - y * 0.35; // wider toward the hem
+      pos.setX(i, x * flare); pos.setZ(i, (x * flare) * (x * flare) * 0.9); // edges curl forward around the body
+    }
+    geo.computeVertexNormals();
+    const capeMesh = new THREE.Mesh(geo, M(L.cape, { side: THREE.DoubleSide, roughness: 0.95 }));
+    capeMesh.castShadow = true; capeMesh.userData.cape = true;
+    const pivot = new THREE.Group(), swing = new THREE.Group(); swing.name = 'capeSwing';
+    pivot.add(swing); swing.add(capeMesh);
+    attachRest(back, pivot, worldPos(back).add(new THREE.Vector3(0, 0.12 * s, -0.13 * s)), s);
+  }
+  const spine = findBone(model, fox ? /Spine01/i : /Spine1$/i);
   return { obj: holder, clips, quad: fox, h: L.h, spineName: spine?.name, walkRef: fox ? 1.1 : 0.8, runRef: fox ? 2.6 : 1.9 };
 }
 
 function tintModel(obj, look, shadow) {
+  const rims = [];
+  const rimColor = shadow ? 0x9d5cff : look.rim ?? look.eyes ?? 0xff5533, rimStrength = shadow ? 1.2 : look.rim ? 0.8 : 0.55;
   obj.traverse(o => {
     if (o.isSprite) { o.material = o.material.clone(); if (shadow) o.material.color.set(0xb46cff); return; }
     if (!o.isMesh) return;
@@ -510,26 +559,30 @@ function tintModel(obj, look, shadow) {
     if (o.userData.glow) { if (shadow) o.material.emissive.set(0xa855f7); return; }
     if (shadow) {
       o.material.color.set(0x140f22); o.material.emissive = new THREE.Color(0x3a0d80); o.material.emissiveIntensity = 0.35;
-    } else if (!o.userData.weapon) {
+    } else if (!o.userData.weapon && !o.userData.cape) {
       o.material.color.set(look.tint);
       if (look.emissive) o.material.emissive = new THREE.Color(look.emissive);
     }
+    const r = addRim(o.material, rimColor, o.userData.weapon || o.userData.cape ? rimStrength * 0.5 : rimStrength);
+    if (r) rims.push(r);
   });
+  return rims;
 }
 
 function makeModelRig(key, shadow) {
   const tpl = templates[key];
   const root = new THREE.Group(), body = new THREE.Group(); root.add(body);
   const inst = SkeletonUtils.clone(tpl.obj); body.add(inst);
-  tintModel(inst, LOOKS[key], shadow);
+  const rims = tintModel(inst, LOOKS[key], shadow);
   root.userData.sharedGeo = true;
+  const capeSwing = inst.getObjectByName('capeSwing');
   const mixer = new THREE.AnimationMixer(inst);
   const acts = {};
   for (const k of ['idle', 'walk', 'run']) if (tpl.clips[k]) acts[k] = mixer.clipAction(tpl.clips[k]);
   const first = acts.idle ? 'idle' : 'walk';
   acts[first].play(); acts[first].time = Math.random() * acts[first].getClip().duration;
   const spine = tpl.spineName ? inst.getObjectByName(tpl.spineName) : null;
-  const rig = { root, body, quad: tpl.quad, model: true, mixer, cur: first };
+  const rig = { root, body, quad: tpl.quad, model: true, mixer, cur: first, rims, capeA: 0.15, lean: 0, flashing: false };
   rig.update = (u, dt) => {
     const spd = u.curSpeed || u.speed;
     let want = u.moving ? (spd > tpl.h * 1.2 ? 'run' : 'walk') : 'idle';
@@ -541,6 +594,29 @@ function makeModelRig(key, shadow) {
     if (spine && a > 0 && !tpl.quad) spine.rotateY(a * 0.9 * (u.atkArm === 'L' ? 1 : -1));
     body.position.z = a * 0.35 * tpl.h / 1.9;
     body.rotation.z = u.stun > 0 ? Math.sin(time * 14) * 0.07 : 0;
+    // Lean back while winding up a big attack, lunge forward into swings, and recoil when hit.
+    const hit = u.hitFlash > 0 ? u.hitFlash : 0;
+    const wantLean = u.windup ? -0.14 : a * 0.2;
+    rig.lean += (wantLean - rig.lean) * Math.min(1, dt * 10);
+    body.rotation.x = (tpl.quad ? rig.lean * 0.5 : rig.lean) - hit * 1.6;
+    // Breathing while standing still.
+    body.scale.y = rig.cur === 'idle' ? 1 + Math.sin(time * 2.2 + (u.seed || 0) * 7) * 0.012 : 1;
+    // Cape swings back with speed and ripples a little.
+    if (capeSwing) {
+      const sp = u.moving ? Math.min(1, spd / (tpl.h * 2.4)) : 0;
+      rig.capeA += (0.12 + sp * 0.8 - rig.capeA) * Math.min(1, dt * 5);
+      capeSwing.rotation.x = rig.capeA + Math.sin(time * (2.5 + sp * 7) + (u.seed || 0) * 5) * (0.04 + sp * 0.07);
+    }
+    // Hit flash: the rim light blazes for a moment.
+    if (hit > 0 || rig.flashing) {
+      for (const r of rig.rims) r.strength.value = r.base + hit * 22;
+      rig.flashing = hit > 0;
+    }
+    if (u.hitFlash > 0) u.hitFlash -= dt;
+    // Heavy footfalls kick up dust for the giants.
+    if (u.pos && u.moving && tpl.h > 4 && Math.random() < dt * 5) burstFX(u.pos.clone().add(new THREE.Vector3((Math.random() - 0.5) * tpl.h * 0.3, 0.2, (Math.random() - 0.5) * tpl.h * 0.3)), 0x6b6280, 3, 2);
+    // A faint shadow mist trails behind you as you move.
+    if (u.isPlayer && u.moving && Math.random() < dt * 14) burstFX(u.pos.clone().setY(0.25 + Math.random() * 0.6), 0x4c1d95, 1, 1.2);
   };
   rig.dispose = () => mixer.stopAllAction();
   return rig;
@@ -1066,7 +1142,7 @@ function spawnUnit(type, team, pos, extra = {}) {
     kb: null, pending: null, windup: null, charge: null, lungeCd: 2, atkCount: 0, ...extra,
   };
   if (T.boss) u.ai = { slamT: 6, chargeT: 4, meteorT: 6, blinkT: 0, phase: 1 };
-  if (extra.elite && rig.model) rig.root.traverse(o => { if (o.isMesh && !o.userData.weapon) { o.material.emissive = new THREE.Color(0x6a4200); o.material.emissiveIntensity = 0.6; } });
+  if (extra.elite && rig.model) rig.root.traverse(o => { if (o.isMesh && !o.userData.weapon && !o.userData.cape) { o.material.emissive = new THREE.Color(0x6a4200); o.material.emissiveIntensity = 0.6; } o.material?.userData?.rim?.color.value.set(0xffc94d); });
   const bar = document.createElement('div');
   // Enemy bosses use the big bar at the top of the screen, so their overhead bar stays hidden.
   if (T.boss && team === 'enemy') { bar.className = 'ubar hidden'; bar.innerHTML = '<i></i>'; }
@@ -1088,6 +1164,7 @@ function dealDamage(target, amount, src, o = {}) {
     if (player.invuln > 0 || !player.alive) return 0;
     player.hp -= amount;
     player.sinceHit = 0;
+    player.hitFlash = 0.12;
     floatText(player.pos.clone().setY(2.6), '-' + Math.round(amount), '#ff6b6b', 16);
     const f = $('flash'); f.style.opacity = Math.min(1, 0.4 + amount / player.maxHp * 3); setTimeout(() => f.style.opacity = 0, 130);
     if (amount > player.maxHp * 0.12) shake(0.35);
@@ -1117,6 +1194,7 @@ function dealDamage(target, amount, src, o = {}) {
   }
   target.hp -= amount;
   target.sinceHit = 0;
+  target.hitFlash = 0.12;
   const col = target.team === 'enemy' ? (tag ? '#94a3b8' : o.crit ? '#fde047' : '#ffffff') : '#d8b4fe';
   if (!o.quiet || Math.random() < 0.3) floatText(target.pos.clone().setY(T.h * 0.8), tag + Math.round(amount) + (o.crit ? '!' : ''), col, o.crit ? 22 : 15);
   if (target.hp <= 0) killUnit(target, src);
@@ -2282,12 +2360,25 @@ const GUARDIAN_ORDER = ['warchief', 'broodmother', 'duelist', 'warden', 'herald'
 let bossQueue = [], bossT = 0;
 // Each rift is a wave of regular enemies followed by a boss fight at the end.
 // Every 5th rift ends with a major boss; every other rift ends with a Rift Guardian.
+// Wolf-type bosses (Bloodfang Alpha, Brood Mother, Cinder Hound) only show up 1 time in 10;
+// otherwise the next non-wolf boss of the same tier takes their place.
+const WOLF_BOSSES = new Set(['alpha', 'broodmother', 'hound']);
+function pickBoss(order, i, avoid) {
+  const L = order.length, t = order[i % L];
+  if ((!WOLF_BOSSES.has(t) || Math.random() < 0.1) && t !== avoid) return t;
+  // Stand-in: a random non-wolf boss that isn't the one before or after it in the rotation.
+  const near = [order[(i + L - 1) % L], order[(i + 1) % L]];
+  const ok = order.filter(x => !WOLF_BOSSES.has(x) && x !== avoid);
+  const pool = ok.filter(x => !near.includes(x));
+  const from = pool.length ? pool : ok;
+  return from[Math.floor(Math.random() * from.length)];
+}
 function riftPlan(n) {
   const p = [], add = (t, c) => { for (let i = 0; i < c; i++) p.push(t); };
   if (n % 5 === 0) {
     add('knight', 1 + Math.floor(n / 10)); add('warlock', 1 + Math.floor(n / 15)); add('orc', 1);
-    const cyc = n / 5, B = BOSS_ORDER.length, bosses = [BOSS_ORDER[(cyc - 1) % B]];
-    if (cyc >= 5) bosses.push(BOSS_ORDER[cyc % B]);
+    const cyc = n / 5, bosses = [pickBoss(BOSS_ORDER, cyc - 1)];
+    if (cyc >= 5) bosses.push(pickBoss(BOSS_ORDER, cyc, bosses[0]));
     return { wave: p, bosses };
   }
   if (n === 1) add('goblin', 6);
@@ -2300,8 +2391,8 @@ function riftPlan(n) {
     for (let i = 0; i < 8 + Math.floor(n * 1.5); i++) p.push(pool[Math.floor(Math.random() * pool.length)]);
   }
   const g = n - 1 - Math.floor(n / 5);
-  const G = GUARDIAN_ORDER.length, bosses = [GUARDIAN_ORDER[g % G]];
-  if (n >= 16) bosses.push(GUARDIAN_ORDER[(g + 3) % G]);
+  const bosses = [pickBoss(GUARDIAN_ORDER, g)];
+  if (n >= 16) bosses.push(pickBoss(GUARDIAN_ORDER, g + 3, bosses[0]));
   return { wave: p, bosses };
 }
 function startRift(n) {
