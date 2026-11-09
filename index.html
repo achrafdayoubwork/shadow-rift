@@ -273,6 +273,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 // ================================================================ setup
 const $ = id => document.getElementById(id);
@@ -297,11 +298,18 @@ scene.fog = new THREE.Fog(0x07060f, 35, 100);
 const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 300);
 addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
 
-scene.add(new THREE.HemisphereLight(0x8a7ae8, 0x1a1020, 1.1));
-const moon = new THREE.DirectionalLight(0xc8ceff, 2.2);
+// A soft studio environment gives every PBR material believable reflections and ambient light
+// (metal shines, cloth stays matte). Kept dim so the arena still feels like night.
+{
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  pmrem.dispose();
+}
+scene.add(new THREE.HemisphereLight(0x8a7ae8, 0x1a1020, 0.8));
+const moon = new THREE.DirectionalLight(0xd4d8ff, 2.6);
 moon.castShadow = true;
 moon.shadow.mapSize.setScalar(IS_TOUCH ? 1024 : 2048);
-moon.shadow.bias = -0.0005;
+moon.shadow.bias = -0.0005; moon.shadow.normalBias = 0.02;
 Object.assign(moon.shadow.camera, { left: -35, right: 35, top: 35, bottom: -35, far: 120 });
 scene.add(moon, moon.target);
 const rim = new THREE.DirectionalLight(0x7c3aed, 0.8); rim.position.set(-30, 20, -30); scene.add(rim);
@@ -324,7 +332,7 @@ function groundTexture() {
   t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(30, 30); t.colorSpace = THREE.SRGBColorSpace;
   return t;
 }
-const ground = new THREE.Mesh(new THREE.PlaneGeometry(240, 240), new THREE.MeshStandardMaterial({ map: groundTexture(), roughness: 0.95 }));
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(240, 240), new THREE.MeshStandardMaterial({ map: groundTexture(), roughness: 0.95, envMapIntensity: 0.12 }));
 ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
 
 function glowRing(r1, r2, color, opacity) {
@@ -335,7 +343,7 @@ glowRing(ARENA_R - 0.4, ARENA_R, 0x7c3aed, 0.6);
 glowRing(9.6, 10, 0x6d28d9, 0.35);
 glowRing(5.8, 6, 0x6d28d9, 0.35);
 
-const stoneMat = new THREE.MeshStandardMaterial({ color: 0x2a2635, roughness: 0.9 });
+const stoneMat = new THREE.MeshStandardMaterial({ color: 0x2a2635, roughness: 0.9, envMapIntensity: 0.2 });
 for (let i = 0; i < 34; i++) {
   const a = Math.random() * TAU, r = ARENA_R + 3 + Math.random() * 12;
   const h = 3 + Math.random() * 9;
@@ -380,7 +388,7 @@ function addRim(mat, color, strength) {
   mat.onBeforeCompile = sh => {
     sh.uniforms.rimColor = rim.color; sh.uniforms.rimStrength = rim.strength;
     sh.fragmentShader = 'uniform vec3 rimColor;\nuniform float rimStrength;\n' + sh.fragmentShader.replace('#include <emissivemap_fragment>',
-      '#include <emissivemap_fragment>\n\tfloat rimF = 1.0 - clamp( dot( normalize( normal ), normalize( vViewPosition ) ), 0.0, 1.0 );\n\ttotalEmissiveRadiance += rimColor * pow( rimF, 2.5 ) * rimStrength;');
+      '#include <emissivemap_fragment>\n\tfloat rimF = 1.0 - clamp( dot( normalize( normal ), normalize( vViewPosition ) ), 0.0, 1.0 );\n\ttotalEmissiveRadiance += rimColor * pow( rimF, 3.5 ) * rimStrength;');
   };
   mat.customProgramCacheKey = () => 'rim';
   return rim;
@@ -407,23 +415,23 @@ const MODEL_URLS = {
 };
 // Visual definition for each character built on a realistic rigged model.
 const LOOKS = {
-  player:   { base: 'soldier', h: 1.9,  tint: 0x4a4560, emissive: 0x0a0418, eyes: 0xa78bfa, weapons: [['R', 'dagger'], ['L', 'dagger']], cape: 0x1c1030, rim: 0x8b5cf6 },
-  goblin:   { base: 'soldier', h: 1.35, tint: 0x7a9a3a, eyes: 0xff2a2a, weapons: [['R', 'club']] },
-  orc:      { base: 'soldier', h: 2.9,  tint: 0x5f8048, eyes: 0xffd000, weapons: [['R', 'axe']], pauldrons: 0x4b4b52 },
-  warlock:  { base: 'soldier', h: 2.0,  tint: 0x9a2f3c, emissive: 0x200000, eyes: 0xff5500, weapons: [['R', 'staff']], cape: 0x3b0a10 },
-  knight:   { base: 'soldier', h: 2.3,  tint: 0xc0c8d6, eyes: 0x66ccff, weapons: [['R', 'sword'], ['L', 'shield']], cape: 0x1e3a8a, pauldrons: 0xb8bec8 },
-  wolf:     { base: 'fox',     h: 1.25, tint: 0x6b6f78 },
-  colossus: { base: 'soldier', h: 7.2,  tint: 0xa06a48, emissive: 0x1a0800, eyes: 0xffaa00, weapons: [['R', 'club']], horns: 0xe5e0cc, pauldrons: 0x6b6258 },
-  alpha:    { base: 'fox',     h: 3.4,  tint: 0x8a2020, emissive: 0x200000 },
-  lich:     { base: 'soldier', h: 3.4,  tint: 0x3c3c50, emissive: 0x061a18, eyes: 0x00ffcc, weapons: [['R', 'staff']], horns: 0x222230, orb: 0x00ffcc, cape: 0x101018 },
-  warchief:    { base: 'soldier', h: 2.7, tint: 0x6f8f2a, emissive: 0x140800, eyes: 0xff2a2a, weapons: [['R', 'axe'], ['L', 'shield']], horns: 0xd6c9a8, cape: 0x4a3220, pauldrons: 0xd6c9a8 },
-  warden:      { base: 'soldier', h: 3.0, tint: 0xa8dcff, emissive: 0x0a2a44, eyes: 0x7dd3fc, weapons: [['R', 'staff']], horns: 0xdbeafe, orb: 0x7dd3fc, cape: 0x1e3a5f },
-  duelist:     { base: 'soldier', h: 2.3, tint: 0x9a1c30, emissive: 0x1a0006, eyes: 0xff3355, weapons: [['R', 'sword'], ['L', 'sword']], cape: 0x5c0a14 },
-  broodmother: { base: 'fox',     h: 3.0, tint: 0x4f7f22, emissive: 0x0a2000 },
-  herald:      { base: 'soldier', h: 2.9, tint: 0xd9c25a, emissive: 0x2a2200, eyes: 0xfde047, weapons: [['R', 'staff']], horns: 0xfef08a, orb: 0xfde047, cape: 0x5c4a12 },
-  reaper:      { base: 'soldier', h: 3.1, tint: 0xd6d3c4, emissive: 0x0c1400, eyes: 0xa3e635, weapons: [['R', 'axe']], horns: 0x1c1917, cape: 0x0c0c0c, pauldrons: 0xd6d3c4 },
-  hound:       { base: 'fox',     h: 2.6, tint: 0xb4441a, emissive: 0x3a0a00 },
-  tyrant:      { base: 'soldier', h: 4.6, tint: 0x3a2a55, emissive: 0x1a0033, eyes: 0xd946ef, weapons: [['R', 'sword'], ['L', 'sword']], horns: 0x120a1f, cape: 0x1c0b33, pauldrons: 0x2a1a40 },
+  player:   { base: 'soldier', h: 1.9,  tint: 0x4a4560, emissive: 0x0a0418, eyes: 0xa78bfa, weapons: [['R', 'dagger'], ['L', 'dagger']], cape: 0x1c1030, rim: 0x8b5cf6, mat: 'leather', keep: 0.12 },
+  goblin:   { base: 'soldier', h: 1.35, tint: 0x7a9a3a, eyes: 0xff2a2a, weapons: [['R', 'club']], mat: 'skin' },
+  orc:      { base: 'soldier', h: 2.9,  tint: 0x5f8048, eyes: 0xffd000, weapons: [['R', 'axe']], pauldrons: 0x4b4b52, mat: 'skin' },
+  warlock:  { base: 'soldier', h: 2.0,  tint: 0x9a2f3c, emissive: 0x200000, eyes: 0xff5500, weapons: [['R', 'staff']], cape: 0x3b0a10, mat: 'cloth' },
+  knight:   { base: 'soldier', h: 2.3,  tint: 0xc0c8d6, eyes: 0x66ccff, weapons: [['R', 'sword'], ['L', 'shield']], cape: 0x1e3a8a, pauldrons: 0xb8bec8, mat: 'plate' },
+  wolf:     { base: 'fox',     h: 1.25, tint: 0x5c5a58, mat: 'fur' },
+  colossus: { base: 'soldier', h: 7.2,  tint: 0xa06a48, emissive: 0x1a0800, eyes: 0xffaa00, weapons: [['R', 'club']], horns: 0xe5e0cc, pauldrons: 0x6b6258, mat: 'skin' },
+  alpha:    { base: 'fox',     h: 3.4,  tint: 0x4a2620, emissive: 0x120000, mat: 'fur' },
+  lich:     { base: 'soldier', h: 3.4,  tint: 0x3c3c50, emissive: 0x061a18, eyes: 0x00ffcc, weapons: [['R', 'staff']], horns: 0x222230, orb: 0x00ffcc, cape: 0x101018, mat: 'cloth' },
+  warchief:    { base: 'soldier', h: 2.7, tint: 0x6f8f2a, emissive: 0x140800, eyes: 0xff2a2a, weapons: [['R', 'axe'], ['L', 'shield']], horns: 0xd6c9a8, cape: 0x4a3220, pauldrons: 0xd6c9a8, mat: 'leather' },
+  warden:      { base: 'soldier', h: 3.0, tint: 0xa8dcff, emissive: 0x0a2a44, eyes: 0x7dd3fc, weapons: [['R', 'staff']], horns: 0xdbeafe, orb: 0x7dd3fc, cape: 0x1e3a5f, mat: 'ice' },
+  duelist:     { base: 'soldier', h: 2.3, tint: 0x9a1c30, emissive: 0x1a0006, eyes: 0xff3355, weapons: [['R', 'sword'], ['L', 'sword']], cape: 0x5c0a14, mat: 'leather' },
+  broodmother: { base: 'fox',     h: 3.0, tint: 0x3d4a2a, emissive: 0x071200, mat: 'fur' },
+  herald:      { base: 'soldier', h: 2.9, tint: 0xd9c25a, emissive: 0x2a2200, eyes: 0xfde047, weapons: [['R', 'staff']], horns: 0xfef08a, orb: 0xfde047, cape: 0x5c4a12, mat: 'plate' },
+  reaper:      { base: 'soldier', h: 3.1, tint: 0xd6d3c4, emissive: 0x0c1400, eyes: 0xa3e635, weapons: [['R', 'axe']], horns: 0x1c1917, cape: 0x0c0c0c, pauldrons: 0xd6d3c4, mat: 'bone' },
+  hound:       { base: 'fox',     h: 2.6, tint: 0x5a2a18, emissive: 0x3a0e00, mat: 'fur' },
+  tyrant:      { base: 'soldier', h: 4.6, tint: 0x3a2a55, emissive: 0x1a0033, eyes: 0xd946ef, weapons: [['R', 'sword'], ['L', 'sword']], horns: 0x120a1f, cape: 0x1c0b33, pauldrons: 0x2a1a40, mat: 'plate' },
 };
 const gltfs = {}, templates = {};
 let MODELS_OK = false;
@@ -472,10 +480,36 @@ function attachRest(bone, obj, pos, scale, quat = new THREE.Quaternion()) {
   bone.add(obj);
 }
 
+// Smooth shading for low-poly meshes: every vertex at the same spot gets the averaged normal,
+// so facets blend together while texture coordinates stay untouched.
+const smoothCache = new Map();
+function smoothNormals(geo) {
+  geo.computeVertexNormals();
+  const pos = geo.attributes.position, nor = geo.attributes.normal, sum = new Map(), keyOf = i => `${pos.getX(i).toFixed(4)},${pos.getY(i).toFixed(4)},${pos.getZ(i).toFixed(4)}`;
+  for (let i = 0; i < pos.count; i++) {
+    const k = keyOf(i), v = sum.get(k) || [0, 0, 0];
+    v[0] += nor.getX(i); v[1] += nor.getY(i); v[2] += nor.getZ(i); sum.set(k, v);
+  }
+  for (let i = 0; i < pos.count; i++) {
+    const v = sum.get(keyOf(i)), l = Math.hypot(v[0], v[1], v[2]) || 1;
+    nor.setXYZ(i, v[0] / l, v[1] / l, v[2] / l);
+  }
+  nor.needsUpdate = true;
+}
+
 function buildTemplate(key) {
   const L = LOOKS[key], g = gltfs[L.base];
   const model = SkeletonUtils.clone(g.scene);
   const holder = new THREE.Group(); holder.add(model);
+  if (L.base === 'fox') model.traverse(o => {
+    if (!o.isMesh) return;
+    // Its texture has the low-poly facets painted in, so wolves use plain fur colour with smooth shading instead.
+    o.material = o.material.clone(); o.material.map = null; o.material.flatShading = false; o.material.needsUpdate = true;
+    // Smooth the low-poly facets: weld shared corners and recompute normals.
+    // (The fox model ships without normals, which is why it rendered flat-shaded.)
+    if (!smoothCache.has(o.geometry)) { const g = o.geometry.clone(); smoothNormals(g); smoothCache.set(o.geometry, g); }
+    o.geometry = smoothCache.get(o.geometry);
+  });
   const clips = {};
   for (const c of g.animations) {
     const n = c.name.toLowerCase();
@@ -548,9 +582,20 @@ function buildTemplate(key) {
   return { obj: holder, clips, quad: fox, h: L.h, spineName: spine?.name, walkRef: fox ? 1.1 : 0.8, runRef: fox ? 2.6 : 1.9 };
 }
 
+// Surface types: how rough or metallic a character looks and how much of its texture shows through the tint.
+const SURFACES = {
+  skin:    { roughness: 0.62, metalness: 0.0,  keep: 0.35 },
+  leather: { roughness: 0.55, metalness: 0.1,  keep: 0.45 },
+  cloth:   { roughness: 0.9,  metalness: 0.0,  keep: 0.3 },
+  plate:   { roughness: 0.32, metalness: 0.75, keep: 0.3 },
+  fur:     { roughness: 0.85, metalness: 0.0,  keep: 0.12 },
+  bone:    { roughness: 0.7,  metalness: 0.05, keep: 0.4 },
+  ice:     { roughness: 0.18, metalness: 0.35, keep: 0.25 },
+};
+const WHITE = new THREE.Color(0xffffff), ENV_INTENSITY = 0.4;
 function tintModel(obj, look, shadow) {
   const rims = [];
-  const rimColor = shadow ? 0x9d5cff : look.rim ?? look.eyes ?? 0xff5533, rimStrength = shadow ? 1.2 : look.rim ? 0.8 : 0.55;
+  const rimColor = shadow ? 0x9d5cff : look.rim ?? look.eyes ?? 0xff5533, rimStrength = shadow ? 0.7 : look.rim ? 0.2 : 0.16;
   obj.traverse(o => {
     if (o.isSprite) { o.material = o.material.clone(); if (shadow) o.material.color.set(0xb46cff); return; }
     if (!o.isMesh) return;
@@ -560,9 +605,13 @@ function tintModel(obj, look, shadow) {
     if (shadow) {
       o.material.color.set(0x140f22); o.material.emissive = new THREE.Color(0x3a0d80); o.material.emissiveIntensity = 0.35;
     } else if (!o.userData.weapon && !o.userData.cape) {
-      o.material.color.set(look.tint);
+      const surf = SURFACES[look.mat] || SURFACES.leather;
+      // Blend the tint toward white so the model's own texture (seams, straps, fur) stays visible.
+      o.material.color.set(look.tint).lerp(WHITE, o.material.map ? look.keep ?? surf.keep : 0);
+      o.material.roughness = surf.roughness; o.material.metalness = surf.metalness;
       if (look.emissive) o.material.emissive = new THREE.Color(look.emissive);
     }
+    if (o.material.isMeshStandardMaterial) o.material.envMapIntensity = o.userData.cape ? 0.15 : ENV_INTENSITY;
     const r = addRim(o.material, rimColor, o.userData.weapon || o.userData.cape ? rimStrength * 0.5 : rimStrength);
     if (r) rims.push(r);
   });
@@ -609,7 +658,7 @@ function makeModelRig(key, shadow) {
     }
     // Hit flash: the rim light blazes for a moment.
     if (hit > 0 || rig.flashing) {
-      for (const r of rig.rims) r.strength.value = r.base + hit * 22;
+      for (const r of rig.rims) r.strength.value = r.base + hit * 14;
       rig.flashing = hit > 0;
     }
     if (u.hitFlash > 0) u.hitFlash -= dt;
@@ -1142,7 +1191,7 @@ function spawnUnit(type, team, pos, extra = {}) {
     kb: null, pending: null, windup: null, charge: null, lungeCd: 2, atkCount: 0, ...extra,
   };
   if (T.boss) u.ai = { slamT: 6, chargeT: 4, meteorT: 6, blinkT: 0, phase: 1 };
-  if (extra.elite && rig.model) rig.root.traverse(o => { if (o.isMesh && !o.userData.weapon && !o.userData.cape) { o.material.emissive = new THREE.Color(0x6a4200); o.material.emissiveIntensity = 0.6; } o.material?.userData?.rim?.color.value.set(0xffc94d); });
+  if (extra.elite && rig.model) rig.root.traverse(o => { if (o.isMesh && !o.userData.weapon && !o.userData.cape) { o.material.emissive = new THREE.Color(0x6a4200); o.material.emissiveIntensity = 0.6; } if (o.material?.userData?.rim) { o.material.userData.rim.color.value.set(0xffc94d); o.material.userData.rim.base = o.material.userData.rim.strength.value = 0.35; } });
   const bar = document.createElement('div');
   // Enemy bosses use the big bar at the top of the screen, so their overhead bar stays hidden.
   if (T.boss && team === 'enemy') { bar.className = 'ubar hidden'; bar.innerHTML = '<i></i>'; }
