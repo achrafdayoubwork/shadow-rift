@@ -31,7 +31,9 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
 - **Read the attacks.** Enemies wind up with a glowing flare in their weapon hand before each hit, lean back as red energy gathers around them before a special attack, and lunge into their swings. Anything that gets hit flashes and recoils.
 - **Characters.** Characters use realistic lighting: the models keep their texture detail (straps, pouches, armour seams), each enemy has its own surface (metal plate shines, cloth and fur stay matte, the Rime Warden looks icy), and wolves have smooth natural-coloured fur. A subtle edge light shows who is who: purple for you and your shadows, the colour of their eyes for enemies, and gold for elites. You, the casters, knights, Warchief, Duelist, Reaper and Tyrant wear capes that billow as they run; armoured foes have shoulder plates; giants kick up dust as they walk; and a faint shadow mist trails behind you.
 - **Clear the rifts.** Waves of goblins, dire wolves, orc brutes, warlocks and armored knights come through rift portals. **Every rift ends with a boss.** Bosses have phases, and their big attacks show a red warning zone on the ground before they hit.
-  - **Every 5th rift** ends with a major boss: the Rift Colossus, the Bloodfang Alpha, the Ashen Lich or the **Void Tyrant**.
+  - **Realms.** Every 5 rifts you cross into a new realm with its own sky, light and colours: Twilight Rift (1–5), Ashen Wastes (6–10), Frozen Hollow (11–15), Blood Moon (16–20), Verdant Blight (21–25) and The Abyss (26–30), then the cycle repeats.
+  - **Every 5th rift** ends with a major boss: the Rift Colossus, the Bloodfang Alpha, the Ashen Lich, the **Void Tyrant** or the **Eclipse Seraph**.
+    - **Eclipse Seraph:** sweeping fans of solar lances, judgement strikes on you and every one of your shadows, a holy nova if you get close, and below half HP an eclipse that doubles the lances.
     - **Void Tyrant:** spinning cross-shaped void beams, gravity wells that drag you in before they explode, shadow-step strikes from behind below half HP, and below 25% an Event Horizon that blasts everything except the area close to it.
   - **The first boss** (end of Rift 1) is an easy introduction: much less HP and damage, no reinforcements, no Last Stand or enrage, and it doesn't heal.
   - **Every other rift** ends with a Rift Guardian:
@@ -42,8 +44,11 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
     - **Storm Herald:** marching lines of lightning, chain lightning that jumps between you and your shadows, and below half HP an overcharge with a static surge that blinks it away.
     - **Bone Reaper:** a ring-shaped scythe sweep (stand right next to it to stay safe), death marks that hit where you stand three times, soul harvest that drains your shadows to heal it, and risen dead below 40% HP.
     - **Cinder Hound:** flame rushes that leave burning ground, rings of eruptions around you, and below half HP a trail of fire everywhere it runs.
+    - **Blight Alchemist:** potion barrages that leave poison and frost pools, a miasma cloud that creeps after you, and below 40% HP a rage elixir that makes it faster and tougher.
+    - **Iron Juggernaut:** shield charges, a fan of ground fissures, expanding shockwave rings, and a shield that turns aside frontal hits (strike from behind); below half HP it fortifies.
+    - **Shade Assassin:** vanishes and reappears behind you for a heavy strike, throws fans of knives, and drops smoke bombs that slow you.
   - **Wolf bosses are rare.** The Bloodfang Alpha, Brood Mother and Cinder Hound never appear before Rift 8, and after that only a tenth as often as the others; most of the time another boss takes their place.
-  - **Bosses get stronger gradually.** The first boss is a gentle introduction; each later guardian is noticeably tougher than the one before, reaching full strength by Rift 6. Major bosses start lighter too and reach full strength by Rift 15.
+  - **Boss HP matches your level.** A boss is built to take a set number of your plain dagger hits: about 45 for the first boss, then 60, 76, 92… rising by 16 each rift (up to 320). Major bosses take about twice as many. Because it is measured in your hits, leveling up never makes bosses trivial or impossible; abilities, crits, combos and shadows all make the fight shorter. Boss damage also ramps up gradually over the first rifts.
   - From rift 16, two guardians appear at once.
   - **A boss never has more than 5 of its summoned guards alive at once.**
   - **Each rift's boss is much stronger than the last:** more HP, more damage, more armor and faster attacks.
