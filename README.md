@@ -42,7 +42,8 @@ A 3D action game that runs in the browser. You play a hunter who grows stronger 
     - **Storm Herald:** marching lines of lightning, chain lightning that jumps between you and your shadows, and below half HP an overcharge with a static surge that blinks it away.
     - **Bone Reaper:** a ring-shaped scythe sweep (stand right next to it to stay safe), death marks that hit where you stand three times, soul harvest that drains your shadows to heal it, and risen dead below 40% HP.
     - **Cinder Hound:** flame rushes that leave burning ground, rings of eruptions around you, and below half HP a trail of fire everywhere it runs.
-  - **Wolf bosses are rare.** The Bloodfang Alpha, Brood Mother and Cinder Hound show up only a tenth as often as the others; most of the time another boss takes their place.
+  - **Wolf bosses are rare.** The Bloodfang Alpha, Brood Mother and Cinder Hound never appear before Rift 8, and after that only a tenth as often as the others; most of the time another boss takes their place.
+  - **Bosses get stronger gradually.** The first boss is a gentle introduction; each later guardian is noticeably tougher than the one before, reaching full strength by Rift 6. Major bosses start lighter too and reach full strength by Rift 15.
   - From rift 16, two guardians appear at once.
   - **A boss never has more than 5 of its summoned guards alive at once.**
   - **Each rift's boss is much stronger than the last:** more HP, more damage, more armor and faster attacks.
